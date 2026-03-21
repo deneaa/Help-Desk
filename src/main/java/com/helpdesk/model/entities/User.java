@@ -20,6 +20,7 @@ public class User {
     private String email;
     private String password;
 
+    // daca nu folosim Enumerated, in baza de date se va salva numarul enum-ului, (0 -> admin, 1 -> user)
     @Enumerated(EnumType.STRING)
     private Role role;
 

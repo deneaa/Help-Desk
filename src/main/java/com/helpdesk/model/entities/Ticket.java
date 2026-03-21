@@ -28,12 +28,12 @@ public class Ticket {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-//test1
     @ManyToOne
     @JoinColumn(name = "created_by")
     private User createdBy;
 
     @ManyToOne
     @JoinColumn(name = "assigned_to")
+    // ManyToOne -> permite mai multe tickete sa fie create de acelasi user
     private User assignedTo;
 }
