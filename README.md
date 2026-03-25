@@ -15,6 +15,7 @@ a structured workflow for handling support requests efficiently.
 - **Backend:** Java 21, Spring Boot 3.5
 - **Database:** PostgreSQL
 - **Build Tool:** Maven
+- **Frontend:** React 19 + TypeScript + Vite
 
 ## Project Structure
 The application is built around 5 core entities:
@@ -33,7 +34,15 @@ The application is built around 5 core entities:
 - 📋 Full audit log and ticket history
 
 ## Getting Started
-Clone the repository and run the application using Maven:
+
+### Backend
+```bash
+.\backend\mvnw -f backend/pom.xml spring-boot:run
 ```
-mvn spring-boot:run
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
 ```
