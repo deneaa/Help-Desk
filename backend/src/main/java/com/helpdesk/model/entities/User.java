@@ -3,6 +3,7 @@ package com.helpdesk.model.entities;
 import com.helpdesk.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,17 +13,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
 
-    // daca nu folosim Enumerated, in baza de date se va salva numarul enum-ului, (0 -> admin, 1 -> user)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }
