@@ -1,8 +1,9 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.entities.Comment;
-import com.helpdesk.service.CommentServiceImpl;
+import com.helpdesk.model.interfaces.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,22 +13,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentController {
 
-    private final CommentServiceImpl commentService;
+    private final CommentService commentService;
+
+    @GetMapping
+    public ResponseEntity<List<Comment>> getAll() {
+        return ResponseEntity.ok(commentService.getAllComments());
+    }
+
+    @GetMapping("/ticket/{ticketId}")
+    public ResponseEntity<List<Comment>> getByTicket(@PathVariable Long ticketId) {
+        return ResponseEntity.ok(commentService.getCommentsByTicket(ticketId));
+    }
+
+    @GetMapping("/ticket/{ticketId}/public")
+    public ResponseEntity<List<Comment>> getPublicByTicket(@PathVariable Long ticketId) {
+        return ResponseEntity.ok(commentService.getPublicCommentsByTicket(ticketId));
+    }
 
     @PostMapping
-    public Comment add(@RequestBody Comment comment) {
-        return commentService.addComment(comment);
+    public ResponseEntity<Comment> add(@RequestBody Comment comment) {
+        return ResponseEntity.ok(commentService.addComment(comment));
     }
 
-    // AGENT vede toate
-    @GetMapping("/ticket/{ticketId}")
-    public List<Comment> getAll(@PathVariable Long ticketId) {
-        return commentService.getCommentsByTicket(ticketId);
-    }
-
-    // USER vede doar publice
-    @GetMapping("/ticket/{ticketId}/public")
-    public List<Comment> getPublic(@PathVariable Long ticketId) {
-        return commentService.getPublicCommentsByTicket(ticketId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        commentService.deleteComment(id);
+        return ResponseEntity.noContent().build();
     }
 }

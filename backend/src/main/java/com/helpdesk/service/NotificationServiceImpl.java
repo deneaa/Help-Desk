@@ -20,6 +20,10 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setRead(false);
         return notificationRepository.save(notification);
     }
+    @Override
+    public List<Notification> getAllNotifications() {
+        return notificationRepository.findAll();
+    }
 
     @Override
     public List<Notification> getNotificationsByUser(Long userId) {

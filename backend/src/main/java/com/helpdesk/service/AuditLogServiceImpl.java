@@ -19,6 +19,10 @@ public class AuditLogServiceImpl implements AuditLogService {
         auditLog.setChangedAt(LocalDateTime.now());
         return auditLogRepository.save(auditLog);
     }
+    @Override
+    public List<AuditLog> getAllLogs() {
+        return auditLogRepository.findAll();
+    }
 
     @Override
     public List<AuditLog> getLogsByTicket(Long ticketId) {

@@ -7,4 +7,6 @@ public interface AuditLogService {
     AuditLog createLog(AuditLog auditLog);
     List<AuditLog> getLogsByTicket(Long ticketId);
     List<AuditLog> getVisibleLogsByTicket(Long ticketId);
+    List<AuditLog> getAllLogs();
+
 }

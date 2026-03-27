@@ -19,6 +19,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedAt(LocalDateTime.now());
         return commentRepository.save(comment);
     }
+    @Override
+    public List<Comment> getAllComments() {
+        return commentRepository.findAll();
+    }
 
     @Override
     public List<Comment> getCommentsByTicket(Long ticketId) {

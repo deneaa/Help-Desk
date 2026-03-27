@@ -8,4 +8,5 @@ public interface CommentService {
     List<Comment> getCommentsByTicket(Long ticketId);
     List<Comment> getPublicCommentsByTicket(Long ticketId);
     void deleteComment(Long id);
+    List<Comment> getAllComments();
 }
