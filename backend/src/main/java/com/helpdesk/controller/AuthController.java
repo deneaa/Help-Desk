@@ -1,6 +1,8 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.config.JwtUtil;
+import com.helpdesk.exceptions.auth.InvalidCredentialsException;
+import com.helpdesk.exceptions.auth.UserAlreadyExistsException;
 import com.helpdesk.mapper.UserMapper;
 import com.helpdesk.model.dto.LoginRequestDTO;
 import com.helpdesk.model.dto.UserRequestDTO;
@@ -9,18 +11,15 @@ import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.service.UserServiceImpl;
 import jakarta.validation.Valid;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Builder
 public class AuthController {
 
     private final UserServiceImpl userService;
@@ -28,31 +27,36 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
-    public UserResponseDTO signup(@RequestBody @Valid UserRequestDTO request) {
+    public ResponseEntity<UserResponseDTO> signup(@RequestBody @Valid UserRequestDTO request) {
+        if (userService.getUserByEmail(request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException(request.getEmail());
+        }
+
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
 
         user = userService.createUser(user);
         String token = jwtUtil.generateToken(user);
 
-        return UserMapper.toDTO(user, token);
+        UserResponseDTO response = UserMapper.toDTO(user, token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public UserResponseDTO login(@RequestBody @Valid LoginRequestDTO request){
+    public ResponseEntity<UserResponseDTO> login(@RequestBody @Valid LoginRequestDTO request){
         User user = userService.getUserByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() -> InvalidCredentialsException.emailNotFound(request.getEmail()));
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new RuntimeException("Invalid email or password");
+            throw InvalidCredentialsException.wrongPassword();
         }
 
         String token = jwtUtil.generateToken(user);
-
-        return UserMapper.toDTO(user, token);
+        UserResponseDTO response = UserMapper.toDTO(user, token);
+        return ResponseEntity.ok(response);
     }
-
 }
