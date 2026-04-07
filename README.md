@@ -13,9 +13,9 @@ a structured workflow for handling support requests efficiently.
 
 ## Tech Stack
 - **Backend:** Java 21, Spring Boot 3.5
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL (hosted on Supabase)
 - **Build Tool:** Maven
-- **Frontend:** React 19 + TypeScript + Vite
+- **Frontend:** React 19 + TypeScript + Vite + Redux for state management
 
 ## Project Structure
 The application is built around 5 core entities:
