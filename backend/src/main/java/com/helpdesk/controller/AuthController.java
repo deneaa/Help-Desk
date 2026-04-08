@@ -31,11 +31,10 @@ public class AuthController {
         if (userService.getUserByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(request.getEmail());
         }
-
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(request.getPassword())
                 .role(Role.USER)
                 .build();
 
