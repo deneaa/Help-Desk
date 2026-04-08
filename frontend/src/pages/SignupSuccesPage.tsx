@@ -1,13 +1,7 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignupSuccessPage = () => {
   const navigate = useNavigate();
-  useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) navigate("/dashboard");
-  }, [navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
@@ -25,4 +19,4 @@ const SignupSuccessPage = () => {
   );
 };
 
-export default SignupSuccessPage
+export default SignupSuccessPage;

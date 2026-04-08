@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { login } from "../features/auth/authSlice";
@@ -78,12 +78,6 @@ const LoginPage = () => {
     }
   };
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) navigate("/dashboard");
-  }, [navigate]);
-  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-purple-50">
       <div className="w-full max-w-md">
