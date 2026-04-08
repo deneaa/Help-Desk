@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { login } from "../features/auth/authSlice";
@@ -15,7 +15,7 @@ const initialForm: IForm = {
   beRemembered: false,
 };
 
-const Login = () => {
+const LoginPage = () => {
   const dispatch = useAppDispatch();
   const [form, setForm] = useState<IForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
@@ -32,22 +32,28 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+
     if (!form.email.trim() || !form.password.trim()) {
       setError("Email și parola sunt obligatorii");
       return;
     }
+
     try {
       const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+
       const data = await response.json();
+
       if (!response.ok) {
         setError(data.message || "Ceva nu a mers bine");
       } else {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem(
+        const storage = form.beRemembered ? localStorage : sessionStorage;
+
+        storage.setItem("token", data.token);
+        storage.setItem(
           "user",
           JSON.stringify({
             id: data.id,
@@ -56,12 +62,14 @@ const Login = () => {
             role: data.role,
           }),
         );
+
         dispatch(
           login({
             user: data,
             token: data.token,
           }),
         );
+
         navigate("/dashboard");
       }
     } catch (err) {
@@ -70,6 +78,12 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) navigate("/dashboard");
+  }, [navigate]);
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-purple-50">
       <div className="w-full max-w-md">
@@ -173,4 +187,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;
