@@ -1,11 +1,8 @@
 package com.helpdesk.exceptions.handlers;
 
-import com.helpdesk.exceptions.auth.InvalidCredentialsException;
-import com.helpdesk.exceptions.auth.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -14,33 +11,25 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleUserExists(UserAlreadyExistsException ex) {
+    private ResponseEntity<Map<String, Object>> buildResponse(Exception ex, HttpStatus status) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now());
-        body.put("status", HttpStatus.CONFLICT.value());
-        body.put("error", "Conflict");
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
         body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+
+        return ResponseEntity.status(status).body(body);
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", Instant.now());
-        body.put("status", HttpStatus.UNAUTHORIZED.value());
-        body.put("error", "Unauthorized");
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+        return buildResponse(ex, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", Instant.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+        return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+
+// by Alex
