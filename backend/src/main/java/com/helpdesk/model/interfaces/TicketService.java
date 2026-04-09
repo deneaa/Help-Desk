@@ -1,15 +1,25 @@
 package com.helpdesk.model.interfaces;
 
-import com.helpdesk.model.entities.Ticket;
+import com.helpdesk.model.dto.TicketDTO;
 import java.util.List;
 
 public interface TicketService {
-    Ticket createTicket(Ticket ticket);
-    Ticket getTicketById(Long id);
-    List<Ticket> getAllTickets();
-    List<Ticket> getTicketsByUser(Long userId);
-    Ticket updateTicket(Long id, Ticket ticket);
-    Ticket assignTicket(Long ticketId, Long agentId);
-    Ticket changeStatus(Long ticketId, String status);
+
+    TicketDTO createTicket(TicketDTO ticketDTO);
+
+    TicketDTO getTicketById(Long id);
+
+    List<TicketDTO> getAllTickets();
+
+    List<TicketDTO> getTicketsByUser(Long userId);
+
+    TicketDTO updateTicket(Long id, TicketDTO ticketDTO);
+
+    TicketDTO assignTicket(Long ticketId, Long agentId);
+
+    TicketDTO changeStatus(Long ticketId, String status);
+
     void deleteTicket(Long id);
+
+    List<TicketDTO> getLastTickets(int limit);
 }
