@@ -9,7 +9,7 @@ import com.helpdesk.model.dto.UserRequestDTO;
 import com.helpdesk.model.dto.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
-import com.helpdesk.service.UserServiceImpl;
+import com.helpdesk.model.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 

@@ -1,7 +1,7 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.entities.Notification;
-import com.helpdesk.service.NotificationServiceImpl;
+import com.helpdesk.model.interfaces.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationServiceImpl notificationService;
+    private final NotificationService notificationService;
 
     @GetMapping
     public List<Notification> getAll() {

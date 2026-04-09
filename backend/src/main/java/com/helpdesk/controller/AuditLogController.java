@@ -1,7 +1,7 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.entities.AuditLog;
-import com.helpdesk.service.AuditLogServiceImpl;
+import com.helpdesk.model.interfaces.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuditLogController {
 
-    private final AuditLogServiceImpl auditLogService;
+    private final AuditLogService auditLogService;
 
     @GetMapping
     public List<AuditLog> getAll() {

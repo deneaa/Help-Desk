@@ -1,7 +1,7 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.entities.User;
-import com.helpdesk.service.UserServiceImpl;
+import com.helpdesk.model.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @PostMapping
     public User create(@RequestBody User user) {
