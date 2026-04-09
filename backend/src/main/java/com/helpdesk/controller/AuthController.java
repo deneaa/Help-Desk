@@ -29,8 +29,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDTO> signup(@RequestBody @Valid UserRequestDTO request) {
         if (userService.getUserByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException(request.getEmail());
+            throw new UserAlreadyExistsException("email", request.getEmail());
         }
+        if (userService.getUserByName(request.getName()).isPresent()){
+            throw new UserAlreadyExistsException("name", request.getName());
+        }
+
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())

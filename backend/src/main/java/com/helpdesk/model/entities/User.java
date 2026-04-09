@@ -25,7 +25,7 @@ public class User {
 
     @NotBlank
     @Size(max = 100)
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @NotBlank

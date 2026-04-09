@@ -48,6 +48,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmailIgnoreCase(email);
     }
+
+    public Optional<User> getUserByName(String name){
+        return userRepository.findByNameIgnoreCase(name);
+    }
+
 }
