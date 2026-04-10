@@ -5,6 +5,7 @@ import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccesPage";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute/GuestRoute";
+import CreateTicketPage from "./pages/CreateTicketPage";
 
 function App() {
   return (
@@ -39,6 +40,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-ticket"
+          element={
+            <ProtectedRoute>
+              <CreateTicketPage />
             </ProtectedRoute>
           }
         />

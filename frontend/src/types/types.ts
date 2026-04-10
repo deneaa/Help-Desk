@@ -1,6 +1,10 @@
 export type Role = "USER" | "AGENT";
 export type Status = "OPEN" | "IN_PROGRESS" | "CLOSED";
 export type Category = "IT" | "HR" | "NETWORK" | "SOFTWARE";
+export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export const Priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
+export const Categories = ["IT", "HR", "NETWORK", "SOFTWARE"] as const;
 
 export interface IUser {
   id: number;
