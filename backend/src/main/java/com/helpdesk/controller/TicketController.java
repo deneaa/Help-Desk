@@ -36,7 +36,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    public TicketDTO getTicket(@Valid @PathVariable Long id){
+    public TicketDTO getTicket(@PathVariable Long id){
         return ticketService.getTicketById(id);
     }
 
@@ -49,7 +49,7 @@ public class TicketController {
         return ticketService.assignTicket(ticketId, request.getAgentId());
     }
 
-    @PatchMapping("{ticketId}/unassign")
+    @PatchMapping("/{ticketId}/unassign")
     public TicketDTO unassign(@PathVariable Long ticketId){
         return ticketService.unassignTicket(ticketId);
     }

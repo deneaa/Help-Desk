@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 
+// RestControllerAdvice -> se aplica global pentru toate controllerele, prinde exceptiile si returneaza JSON
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -29,6 +30,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    // prinde orice RuntimeException
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(
             RuntimeException ex,
@@ -37,6 +39,7 @@ public class GlobalExceptionHandler {
         return buildResponse(ex, HttpStatus.BAD_REQUEST, request);
     }
 
+    // orice exceptie care nu a fost prinsa mai sus -> (eroare 500, problema interna server)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(
             Exception ex,
