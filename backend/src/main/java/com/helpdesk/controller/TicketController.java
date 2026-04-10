@@ -35,13 +35,23 @@ public class TicketController {
         return ticketService.getLastTickets(limit);
     }
 
+    @GetMapping("/{id}")
+    public TicketDTO getTicket(@Valid @PathVariable Long id){
+        return ticketService.getTicketById(id);
+    }
+
     // ASSIGN
-    @PutMapping("/{ticketId}/assign")
+    @PatchMapping("/{ticketId}/assign")
     public TicketDTO assign(
             @PathVariable Long ticketId,
             @Valid @RequestBody AssignRequestDTO request
     ) {
         return ticketService.assignTicket(ticketId, request.getAgentId());
+    }
+
+    @PatchMapping("{ticketId}/unassign")
+    public TicketDTO unassign(@PathVariable Long ticketId){
+        return ticketService.unassignTicket(ticketId);
     }
 
     // STATUS

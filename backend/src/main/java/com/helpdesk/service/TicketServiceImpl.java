@@ -117,6 +117,14 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketDTO unassignTicket(Long ticketId){
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+        ticket.setAssignedTo(null);
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
     public TicketDTO changePriority(Long ticketId, Priority priority){
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
@@ -140,4 +148,5 @@ public class TicketServiceImpl implements TicketService {
                 .map(TicketMapper::toDTO)
                 .toList();
     }
+
 }

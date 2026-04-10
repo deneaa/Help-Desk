@@ -21,6 +21,8 @@ public interface TicketService {
 
     TicketDTO assignTicket(Long ticketId, Long agentId);
 
+    TicketDTO unassignTicket (Long ticketId);
+
     TicketDTO changeStatus(Long ticketId, Status status);
 
     TicketDTO changePriority(Long ticketId, Priority priority);

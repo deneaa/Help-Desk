@@ -50,11 +50,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDTO> login(@RequestBody @Valid LoginRequestDTO request){
+    public ResponseEntity<UserResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
         User user = userService.getUserByEmail(request.getEmail())
                 .orElseThrow(() -> InvalidCredentialsException.emailNotFound(request.getEmail()));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw InvalidCredentialsException.wrongPassword();
         }
 
