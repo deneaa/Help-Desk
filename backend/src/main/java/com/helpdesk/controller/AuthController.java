@@ -1,12 +1,12 @@
 package com.helpdesk.controller;
 
-import com.helpdesk.config.JwtUtil;
+import com.helpdesk.security.JwtUtil;
 import com.helpdesk.exceptions.auth.InvalidCredentialsException;
-import com.helpdesk.exceptions.auth.UserAlreadyExistsException;
+import com.helpdesk.exceptions.user.UserAlreadyExistsException;
 import com.helpdesk.mapper.UserMapper;
-import com.helpdesk.model.dto.LoginRequestDTO;
-import com.helpdesk.model.dto.UserRequestDTO;
-import com.helpdesk.model.dto.UserResponseDTO;
+import com.helpdesk.model.dto.auth.LoginRequestDTO;
+import com.helpdesk.model.dto.auth.UserRequestDTO;
+import com.helpdesk.model.dto.auth.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.UserService;

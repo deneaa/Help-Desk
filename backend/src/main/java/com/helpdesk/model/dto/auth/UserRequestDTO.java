@@ -1,4 +1,4 @@
-package com.helpdesk.model.dto;
+package com.helpdesk.model.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

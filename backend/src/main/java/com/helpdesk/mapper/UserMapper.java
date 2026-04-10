@@ -1,6 +1,6 @@
 package com.helpdesk.mapper;
 
-import com.helpdesk.model.dto.UserResponseDTO;
+import com.helpdesk.model.dto.auth.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 
 public class UserMapper {

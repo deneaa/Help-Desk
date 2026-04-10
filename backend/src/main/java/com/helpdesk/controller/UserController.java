@@ -1,6 +1,8 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.model.dto.ticket.TicketDTO;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.model.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final TicketService ticketService;
 
     @PostMapping
     public User create(@RequestBody User user) {
@@ -23,4 +26,9 @@ public class UserController {
     public List<User> getAll() {
         return userService.getAllUsers();
     }
-}
+
+    @GetMapping("{userId}/tickets")
+    public List<TicketDTO> getTicketsByUser(@PathVariable Long userId){
+        return ticketService.getTicketsByUser(userId);
+    }
+ }

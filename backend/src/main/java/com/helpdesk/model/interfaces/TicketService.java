@@ -1,15 +1,18 @@
 package com.helpdesk.model.interfaces;
 
-import com.helpdesk.model.dto.TicketDTO;
+import com.helpdesk.model.dto.ticket.CreateTicketDTO;
+import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.enums.Status;
+
 import java.util.List;
 
 public interface TicketService {
 
-    TicketDTO createTicket(TicketDTO ticketDTO);
+    TicketDTO createTicket(CreateTicketDTO createTicketDTO);
 
     TicketDTO getTicketById(Long id);
 
-    List<TicketDTO> getAllTickets();
+    List<TicketDTO> getAllTickets(int limit);
 
     List<TicketDTO> getTicketsByUser(Long userId);
 
@@ -17,7 +20,7 @@ public interface TicketService {
 
     TicketDTO assignTicket(Long ticketId, Long agentId);
 
-    TicketDTO changeStatus(Long ticketId, String status);
+    TicketDTO changeStatus(Long ticketId, Status status);
 
     void deleteTicket(Long id);
 

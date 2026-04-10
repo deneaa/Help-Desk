@@ -1,15 +1,21 @@
 package com.helpdesk.service;
 
+import com.helpdesk.exceptions.ticket.TicketNotFoundException;
+import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.TicketMapper;
-import com.helpdesk.model.dto.TicketDTO;
+import com.helpdesk.model.dto.ticket.CreateTicketDTO;
+import com.helpdesk.model.dto.ticket.TicketDTO;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
+import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,10 +29,20 @@ public class TicketServiceImpl implements TicketService {
     private final UserRepository userRepository;
 
     @Override
-    public TicketDTO createTicket(TicketDTO dto) {
+    public TicketDTO createTicket(CreateTicketDTO dto) {
+        UserPrincipal userPrincipal =
+                (UserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        User user = userPrincipal.getUser();
+
         Ticket ticket = TicketMapper.toEntity(dto);
 
+        ticket.setCreatedBy(user);
         ticket.setStatus(Status.OPEN);
+
         ticket.setCreatedAt(LocalDateTime.now());
         ticket.setUpdatedAt(LocalDateTime.now());
 
@@ -41,8 +57,9 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public List<TicketDTO> getAllTickets() {
-        return ticketRepository.findAll()
+    public List<TicketDTO> getAllTickets(int limit) {
+        return ticketRepository
+                .findAll(PageRequest.of(0, limit))
                 .stream()
                 .map(TicketMapper::toDTO)
                 .toList();
@@ -77,6 +94,10 @@ public class TicketServiceImpl implements TicketService {
         User agent = userRepository.findById(agentId)
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
+        if (agent.getRole() != Role.AGENT){
+            throw new NotAnAgentException(agentId);
+        }
+
         ticket.setAssignedTo(agent);
         ticket.setUpdatedAt(LocalDateTime.now());
 
@@ -84,11 +105,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketDTO changeStatus(Long ticketId, String status) {
+    public TicketDTO changeStatus(Long ticketId, Status status) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
 
-        ticket.setStatus(Status.valueOf(status));
+        ticket.setStatus(status);
         ticket.setUpdatedAt(LocalDateTime.now());
 
         return TicketMapper.toDTO(ticketRepository.save(ticket));

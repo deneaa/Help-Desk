@@ -1,8 +1,8 @@
 package com.helpdesk.mapper;
 
-import com.helpdesk.model.dto.TicketDTO;
+import com.helpdesk.model.dto.ticket.CreateTicketDTO;
+import com.helpdesk.model.dto.ticket.TicketDTO;
 import com.helpdesk.model.entities.Ticket;
-import com.helpdesk.model.enums.Category;
 
 public class TicketMapper {
 
@@ -15,12 +15,17 @@ public class TicketMapper {
                 .category(ticket.getCategory())
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
+
+                .createdById(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getId() : null)
                 .createdByName(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getName() : null)
+
+                .assignedToId(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getId() : null)
                 .assignedToName(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getName() : null)
+
                 .build();
     }
 
-    public static Ticket toEntity(TicketDTO dto) {
+    public static Ticket toEntity(CreateTicketDTO dto) {
         Ticket ticket = new Ticket();
         ticket.setTitle(dto.getTitle());
         ticket.setDescription(dto.getDescription());

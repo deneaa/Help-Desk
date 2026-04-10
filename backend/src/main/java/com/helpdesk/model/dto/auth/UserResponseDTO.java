@@ -1,4 +1,4 @@
-package com.helpdesk.model.dto;
+package com.helpdesk.model.dto.auth;
 
 import com.helpdesk.model.enums.Role;
 import lombok.*;
