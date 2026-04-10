@@ -5,6 +5,7 @@ export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export const Priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 export const Categories = ["IT", "HR", "NETWORK", "SOFTWARE"] as const;
+export const Statuses = ["OPEN", "IN_PROGRESS", "CLOSED"] as const;
 
 export interface IUser {
   id: number;
@@ -20,10 +21,15 @@ export interface ITicket {
   description: string;
   status: Status;
   category: Category;
+  priority: Priority;
   createdAt: string;
   updatedAt: string;
-  createdBy: IUser;
-  assignedTo: IUser | null;
+
+  createdById: number | null;
+  createdByName: string | null;
+
+  assignedToId: number | null;
+  assignedToName: string | null;
 }
 
 export interface IComment {

@@ -6,6 +6,7 @@ import SignupSuccessPage from "./pages/SignupSuccesPage";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute/GuestRoute";
 import CreateTicketPage from "./pages/CreateTicketPage";
+import TicketDetailsPage from "./pages/TicketDetailsPage";
 
 function App() {
   return (
@@ -48,6 +49,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateTicketPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets/:id"
+          element={
+            <ProtectedRoute>
+              <TicketDetailsPage />
             </ProtectedRoute>
           }
         />
