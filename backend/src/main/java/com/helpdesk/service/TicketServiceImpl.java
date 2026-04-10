@@ -7,6 +7,7 @@ import com.helpdesk.model.dto.ticket.CreateTicketDTO;
 import com.helpdesk.model.dto.ticket.TicketDTO;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.TicketService;
@@ -112,6 +113,16 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStatus(status);
         ticket.setUpdatedAt(LocalDateTime.now());
 
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public TicketDTO changePriority(Long ticketId, Priority priority){
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        ticket.setPriority(priority);
+        ticket.setUpdatedAt(LocalDateTime.now());
         return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 

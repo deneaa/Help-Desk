@@ -15,6 +15,7 @@ public class TicketMapper {
                 .category(ticket.getCategory())
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
+                .priority(ticket.getPriority())
 
                 .createdById(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getId() : null)
                 .createdByName(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getName() : null)
@@ -28,6 +29,7 @@ public class TicketMapper {
     public static Ticket toEntity(CreateTicketDTO dto) {
         Ticket ticket = new Ticket();
         ticket.setTitle(dto.getTitle());
+        ticket.setPriority(dto.getPriority());
         ticket.setDescription(dto.getDescription());
         ticket.setCategory(dto.getCategory());
         return ticket;

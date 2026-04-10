@@ -1,6 +1,7 @@
 package com.helpdesk.model.dto.ticket;
 
 import com.helpdesk.model.enums.Category;
+import com.helpdesk.model.enums.Priority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -22,4 +23,7 @@ public class CreateTicketDTO {
 
     @NotNull(message = "Category is required")
     private Category category;
+
+    @NotNull(message = "Priority is required")
+    private Priority priority;
 }

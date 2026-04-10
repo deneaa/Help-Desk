@@ -1,6 +1,7 @@
 package com.helpdesk.model.entities;
 
 import com.helpdesk.model.enums.Category;
+import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +43,11 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

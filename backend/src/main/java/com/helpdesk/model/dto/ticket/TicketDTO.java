@@ -1,6 +1,7 @@
 package com.helpdesk.model.dto.ticket;
 
 import com.helpdesk.model.enums.Category;
+import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class TicketDTO {
 
     private Status status;
     private Category category;
+    private Priority priority;
 
     private Long createdById;
     private String createdByName;

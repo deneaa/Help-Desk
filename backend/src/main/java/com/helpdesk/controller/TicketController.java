@@ -1,9 +1,6 @@
 package com.helpdesk.controller;
 
-import com.helpdesk.model.dto.ticket.AssignRequestDTO;
-import com.helpdesk.model.dto.ticket.ChangeStatusRequestDTO;
-import com.helpdesk.model.dto.ticket.CreateTicketDTO;
-import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.dto.ticket.*;
 import com.helpdesk.model.interfaces.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,5 +51,12 @@ public class TicketController {
             @Valid @RequestBody ChangeStatusRequestDTO request
     ) {
         return ticketService.changeStatus(ticketId, request.getStatus());
+    }
+
+    @PatchMapping("/{ticketId}/priority")
+    public TicketDTO changePriority(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody ChangePriorityRequestDTO request){
+        return ticketService.changePriority(ticketId, request.getPriority());
     }
 }
