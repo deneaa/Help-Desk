@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 
+// GlobalExceptionHandler (@RestControllerAdvice) -> handler global pentru exceptii, orice exceptie aruncata ajunge aici daca exista un @ExceptionHandler potrivit.
+//(Gestioneaza erorile intr-un singur loc si poate returna raspuns uniform JSON + status code)
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

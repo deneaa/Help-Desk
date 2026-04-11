@@ -1,5 +1,6 @@
 package com.helpdesk.security;
 
+import com.helpdesk.exceptions.user.UserNotFoundException;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
 
         User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return new UserPrincipal(user);
     }
