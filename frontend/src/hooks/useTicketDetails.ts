@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getTicketDetails } from "../services/tickets/getTicketDetails";
+import { getCommentsByTicket } from "../services/comments/getCommentsByTicket";
 import type { ITicket } from "../types/types";
 
 export const useTicketDetails = (id: number, token: string | null) => {
@@ -11,8 +12,19 @@ export const useTicketDetails = (id: number, token: string | null) => {
     const load = async () => {
       try {
         if (!token) return;
-        const data = await getTicketDetails(id, token);
-        setTicket(data);
+
+        const [ticketData, commentsData] = await Promise.all([
+          getTicketDetails(id, token),
+          getCommentsByTicket(id, token),
+        ]);
+
+        console.log(ticketData);
+        console.log(commentsData);
+
+        setTicket({
+          ...ticketData,
+          comments: commentsData,
+        });
       } catch (err) {
         console.error(err);
         setError("Error loading ticket");
@@ -20,6 +32,7 @@ export const useTicketDetails = (id: number, token: string | null) => {
         setLoading(false);
       }
     };
+
     load();
   }, [id, token]);
 

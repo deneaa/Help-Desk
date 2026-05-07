@@ -30,7 +30,7 @@ export interface ITicket {
 
   assignedToId: number | null;
   assignedToName: string | null;
-  comments: IComment[];
+  comments?: IComment[];
 }
 
 export interface IComment {
@@ -39,7 +39,7 @@ export interface IComment {
   isInternal: boolean;
   createdAt: string;
   author: IUser;
-  ticket: ITicket;
+  ticketId: number;
 }
 
 export interface INotification {
@@ -48,7 +48,7 @@ export interface INotification {
   isRead: boolean;
   createdAt: string;
   user: IUser;
-  ticket: ITicket;
+  ticketId: number;
 }
 
 export interface IAuditLog {
@@ -58,6 +58,6 @@ export interface IAuditLog {
   newValue?: string;
   isVisibleToUser: boolean;
   changedAt: string;
-  ticket: ITicket;
+  ticketId: number;
   changedBy: IUser;
 }

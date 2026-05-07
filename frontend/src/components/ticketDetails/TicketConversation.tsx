@@ -1,12 +1,10 @@
-import type { ITicket } from "../../types/types";
+import type { IComment } from "../../types/types";
 
 interface Props {
-  ticket: ITicket;
+  comments: IComment[];
 }
 
-export const TicketConversation = ({ ticket }: Props) => {
-  const comments = ticket.comments ?? [];
-
+export const TicketConversation = ({ comments }: Props) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
       <h2 className="text-gray-900 mb-6">Conversation</h2>
@@ -42,7 +40,6 @@ export const TicketConversation = ({ ticket }: Props) => {
         )}
       </div>
 
-      {/* Add Comment UI (pregătit, dar fără logică încă) */}
       <div className="mt-8 border-t border-gray-100 pt-6">
         <h3 className="text-gray-900 mb-4">Add Comment</h3>
 
@@ -66,4 +63,3 @@ export const TicketConversation = ({ ticket }: Props) => {
     </div>
   );
 };
-

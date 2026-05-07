@@ -19,7 +19,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* PUBLIC */}
         <Route
           path="/login"
           element={
@@ -47,7 +46,6 @@ function App() {
           }
         />
 
-        {/* PROTECTED AREA (USER + ADMIN UI SHARED LAYOUT) */}
         <Route
           element={
             <ProtectedRoute>
@@ -60,7 +58,6 @@ function App() {
           <Route path="/tickets/my" element={<MyTicketsPage />} />
           <Route path="/tickets/:id" element={<TicketDetailsPage />} />
 
-          {/* ADMIN PAGE CU ACELAȘI LAYOUT */}
           <Route
             path="/admin"
             element={
@@ -71,7 +68,6 @@ function App() {
           />
         </Route>
 
-        {/* fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

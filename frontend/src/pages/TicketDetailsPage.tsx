@@ -1,12 +1,22 @@
-import { type ITicket, type Priority, type Status } from "../types/types";
+import {
+  type ITicket,
+  type Priority,
+  type Status,
+  type IComment,
+} from "../types/types";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 import { getTicketDetails } from "../services/ticketDetailsService";
+import { getCommentsByTicket } from "../services/comments/getCommentsByTicket";
+
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
+
 import { updateTicketStatus } from "../services/tickets/updateTicketStatus";
 import { assignTicket } from "../services/tickets/assignTicket";
 import { updateTicketPriority } from "../services/tickets/updateTicketPriority";
+
 import { TicketHeader } from "../components/ticketDetails/TicketHeader";
 import { TicketDetailsMain } from "../components/ticketDetails/TicketDetailsMain";
 import { TicketConversation } from "../components/ticketDetails/TicketConversation";
@@ -17,57 +27,77 @@ import { TicketStatusPanel } from "../components/ticketDetails/TicketStatusPanel
 
 const TicketDetailsPage = () => {
   const { id } = useParams();
+
   const token = useAppSelector((state: RootState) => state.auth.token);
-  const agentId = useAppSelector((state: RootState) => state.auth.user!.id);
+  const agentId = useAppSelector((state: RootState) => state.auth.user?.id);
 
   const [ticket, setTicket] = useState<ITicket | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<Status | "">("");
-  const [error, setError] = useState<string | null>(null);
+  const [comments, setComments] = useState<IComment[]>([]);
 
-  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<Status | "">("");
   const [selectedPriority, setSelectedPriority] = useState<Priority | "">("");
 
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const load = async () => {
+    const loadTicketData = async () => {
       try {
-        if (token) {
-          const data = await getTicketDetails(Number(id), token);
-          setTicket(data);
-          setSelectedStatus(data.status);
-          setSelectedPriority(data.priority);
-        }
+        if (!token || !id) return;
+
+        const ticketData = await getTicketDetails(Number(id), token);
+        const commentsData = await getCommentsByTicket(Number(id), token);
+
+        setTicket(ticketData);
+        setComments(commentsData);
+
+        setSelectedStatus(ticketData.status);
+        setSelectedPriority(ticketData.priority);
       } catch (err) {
-        setError("Error loading ticket");
         console.log(err);
+        setError("Failed to load ticket");
+      } finally {
+        setLoading(false);
       }
     };
 
-    load();
+    loadTicketData();
   }, [id, token]);
 
-  if (error) return <p>{error}</p>;
-  if (!ticket) return <p>Loading...</p>;
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!ticket) {
+    return <p>Ticket not found</p>;
+  }
 
   const handleStatusUpdate = async () => {
-    if (!ticket) return;
-    if (!selectedStatus) return null;
+    if (!selectedStatus || !token) return;
 
     if (ticket.status === selectedStatus) {
-      setError("Ticket-ul are deja acest status");
+      setError("Ticket already has this status");
       return;
     }
 
     try {
-      const updated = await updateTicketStatus(
+      const updatedTicket = await updateTicketStatus(
         Number(id),
         selectedStatus,
-        token!,
+        token,
       );
 
-      setTicket(updated);
+      setTicket(updatedTicket);
+      setError(null);
     } catch (err) {
-      setError("Status update failed");
       console.log(err);
+      setError("Failed to update status");
     }
   };
 
@@ -75,50 +105,52 @@ const TicketDetailsPage = () => {
     if (!ticket || !agentId || !token) return;
 
     if (ticket.assignedToId && ticket.assignedToId !== agentId) {
-      setError("Ticket-ul este preluat deja de altcineva");
+      setError("Ticket is already assigned");
       return;
     }
 
     if (ticket.assignedToId === agentId) {
-      setError("Ticket-ul este deja alocat ție");
+      setError("Ticket already assigned to you");
       return;
     }
 
     if (ticket.createdById === agentId) {
-      setError("Nu poti sa-ti aloci tie ticket-ul facut de tine");
+      setError("You cannot assign your own ticket");
       return;
     }
 
     try {
-      const updated = await assignTicket(Number(id), agentId, token);
-      setTicket(updated);
+      const updatedTicket = await assignTicket(Number(id), agentId, token);
+
+      setTicket(updatedTicket);
+      setError(null);
     } catch (err) {
-      setError("Eroare la assign");
       console.log(err);
+      setError("Failed to assign ticket");
     }
   };
 
   const handlePriorityUpdate = async () => {
-    if (!ticket || !token) return;
-    if (!selectedPriority) return;
+    if (!selectedPriority || !token) return;
 
     if (ticket.priority === selectedPriority) {
-      setError("Priority already set");
+      setError("Ticket already has this priority");
       return;
     }
 
     try {
-      const updated = await updateTicketPriority(
+      const updatedTicket = await updateTicketPriority(
         Number(id),
         selectedPriority,
         token,
       );
 
-      setTicket(updated);
+      setTicket(updatedTicket);
       setIsPriorityOpen(false);
+      setError(null);
     } catch (err) {
-      setError("Failed to update priority");
       console.log(err);
+      setError("Failed to update priority");
     }
   };
 
@@ -126,10 +158,17 @@ const TicketDetailsPage = () => {
     <div className="space-y-6">
       <TicketHeader />
 
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
           <TicketDetailsMain ticket={ticket} />
-          <TicketConversation ticket={ticket} />
+
+          <TicketConversation comments={comments} />
         </div>
 
         <div className="space-y-6">
@@ -140,6 +179,7 @@ const TicketDetailsPage = () => {
           />
 
           <TicketDetailsPanel ticket={ticket} />
+
           <TicketActionsPanel
             onAssign={handleAssign}
             onPriorityOpen={() => setIsPriorityOpen(true)}
