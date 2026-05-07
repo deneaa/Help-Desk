@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Send } from "lucide-react";
 import {
   Categories,
@@ -32,6 +32,7 @@ const CreateTicketPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (
       !formData.category ||
       !formData.description ||
@@ -56,11 +57,13 @@ const CreateTicketPage = () => {
 
       if (!response.ok) {
         setError(data.message);
-      } else {
-        navigate("/dashboard");
+        return;
       }
+
+      navigate(`/tickets/${data.id}`);
     } catch (err) {
       console.log(err);
+      setError("Something went wrong");
     }
   };
 
@@ -156,6 +159,7 @@ const CreateTicketPage = () => {
                 ))}
               </select>
             </div>
+
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </div>
 
@@ -167,24 +171,16 @@ const CreateTicketPage = () => {
               <Send className="w-5 h-5" />
               Submit Ticket
             </button>
+
             <button
               type="button"
+              onClick={() => navigate("/dashboard")}
               className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all"
             >
               Cancel
             </button>
           </div>
         </form>
-      </div>
-
-      <div className="mt-6 bg-violet-50 rounded-2xl p-6 border border-violet-100">
-        <h3 className="text-violet-900 mb-2">Tips for Better Support</h3>
-        <ul className="space-y-2 text-violet-700 text-sm">
-          <li>• Be specific and descriptive in your title</li>
-          <li>• Include relevant details like error messages or screenshots</li>
-          <li>• Choose the appropriate priority level</li>
-          <li>• Select the correct category for faster routing</li>
-        </ul>
       </div>
     </div>
   );

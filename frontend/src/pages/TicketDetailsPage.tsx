@@ -1,6 +1,3 @@
-// THIS IS JUST A PROTOTYPE, IGNORE THE MESS
-// It will be refactored into modular components and better structure later
-
 import { type ITicket, type Priority, type Status } from "../types/types";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";

@@ -1,20 +1,25 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccesPage";
-import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
-import GuestRoute from "./components/GuestRoute/GuestRoute";
+
 import CreateTicketPage from "./pages/CreateTicketPage";
 import TicketDetailsPage from "./pages/TicketDetailsPage";
 import MyTicketsPage from "./pages/MyTicketsPage";
-import AdminRoute from "./components/AdminRoute/AdminRoute";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import GuestRoute from "./components/GuestRoute/GuestRoute";
+import AdminRoute from "./components/AdminRoute/AdminRoute";
+import { AppLayout } from "./layout/AppLayout";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* PUBLIC */}
         <Route
           path="/login"
           element={
@@ -23,6 +28,7 @@ function App() {
             </GuestRoute>
           }
         />
+
         <Route
           path="/signup"
           element={
@@ -31,6 +37,7 @@ function App() {
             </GuestRoute>
           }
         />
+
         <Route
           path="/signup-success"
           element={
@@ -39,48 +46,32 @@ function App() {
             </GuestRoute>
           }
         />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/create-ticket"
-          element={
-            <ProtectedRoute>
-              <CreateTicketPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/tickets/my"
-          element={
-            <ProtectedRoute>
-              <MyTicketsPage />
-            </ProtectedRoute>
-          }
-        />
 
+        {/* PROTECTED AREA (USER + ADMIN UI SHARED LAYOUT) */}
         <Route
-          path="/tickets/:id"
           element={
             <ProtectedRoute>
-              <TicketDetailsPage />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/create-ticket" element={<CreateTicketPage />} />
+          <Route path="/tickets/my" element={<MyTicketsPage />} />
+          <Route path="/tickets/:id" element={<TicketDetailsPage />} />
 
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboardPage />
-            </AdminRoute>
-          }
-        />
+          {/* ADMIN PAGE CU ACELAȘI LAYOUT */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
+            }
+          />
+        </Route>
+
+        {/* fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
