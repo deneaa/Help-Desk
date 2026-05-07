@@ -1,5 +1,6 @@
 package com.helpdesk.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.helpdesk.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -45,4 +46,8 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
 }

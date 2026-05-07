@@ -1,5 +1,6 @@
 package com.helpdesk.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.helpdesk.model.enums.Category;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
@@ -11,6 +12,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tickets")
@@ -64,4 +67,8 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Comment> comments = new ArrayList<>();
 }

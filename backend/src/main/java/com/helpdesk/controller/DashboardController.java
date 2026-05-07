@@ -1,5 +1,6 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.model.dto.dashboard.DashboardStatsDTO;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +14,27 @@ public class DashboardController {
     private final TicketRepository ticketRepository;
 
     @GetMapping
-    public Object stats() {
-        return new Object() {
-            public long open = ticketRepository.findAll().stream()
-                    .filter(t -> t.getStatus() == Status.OPEN).count();
+    public DashboardStatsDTO stats() {
 
-            public long inProgress = ticketRepository.findAll().stream()
-                    .filter(t -> t.getStatus() == Status.IN_PROGRESS).count();
+        long total = ticketRepository.count();
 
-            public long closed = ticketRepository.findAll().stream()
-                    .filter(t -> t.getStatus() == Status.CLOSED).count();
-        };
+        long open = ticketRepository.findAll().stream()
+                .filter(t -> t.getStatus() == Status.OPEN)
+                .count();
+
+        long inProgress = ticketRepository.findAll().stream()
+                .filter(t -> t.getStatus() == Status.IN_PROGRESS)
+                .count();
+
+        long closed = ticketRepository.findAll().stream()
+                .filter(t -> t.getStatus() == Status.CLOSED)
+                .count();
+
+        return new DashboardStatsDTO(
+                total,
+                open,
+                inProgress,
+                closed
+        );
     }
 }
