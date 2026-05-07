@@ -25,11 +25,12 @@ export interface ITicket {
   createdAt: string;
   updatedAt: string;
 
-  createdById: number | null;
-  createdByName: string | null;
+  createdById: number;
+  createdByName: string;
 
   assignedToId: number | null;
   assignedToName: string | null;
+  comments: IComment[];
 }
 
 export interface IComment {

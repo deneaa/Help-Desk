@@ -7,6 +7,9 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute/GuestRoute";
 import CreateTicketPage from "./pages/CreateTicketPage";
 import TicketDetailsPage from "./pages/TicketDetailsPage";
+import MyTicketsPage from "./pages/MyTicketsPage";
+import AdminRoute from "./components/AdminRoute/AdminRoute";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 function App() {
   return (
@@ -53,11 +56,29 @@ function App() {
           }
         />
         <Route
+          path="/tickets/my"
+          element={
+            <ProtectedRoute>
+              <MyTicketsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/tickets/:id"
           element={
             <ProtectedRoute>
               <TicketDetailsPage />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />

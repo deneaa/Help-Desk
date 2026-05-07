@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
-import { login } from "../features/auth/authSlice";
+import { login } from "../redux/slices/authSlice";
 
 interface IForm {
   email: string;
@@ -65,7 +65,12 @@ const LoginPage = () => {
 
         dispatch(
           login({
-            user: data,
+            user: {
+              id: data.id,
+              name: data.name,
+              email: data.email,
+              role: data.role,
+            },
             token: data.token,
           }),
         );

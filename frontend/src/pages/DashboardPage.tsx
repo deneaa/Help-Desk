@@ -1,8 +1,40 @@
 // still working
 
+import { LogOut } from "lucide-react";
+import type { RootState } from "../redux/store";
+import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
+import { logout } from "../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
-  return <div>DashboardPage</div>;
+  const user = useAppSelector((state: RootState) => state.auth.user?.role);
+  const name = useAppSelector((state: RootState) => state.auth.user?.name);
+
+  const navigate = useNavigate();
+
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+  
+  return (
+    <div className="mt-4 ml-5">
+      <h1 className="flex items-center gap-3 text-xl font-semibold">
+        Welcome {name} - {user}
+        <button
+          className="ml-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl 
+             bg-red-500 text-white text-sm font-medium
+             hover:bg-red-600 active:scale-95 transition-all shadow-md"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>{" "}
+      </h1>
+    </div>
+  );
 };
 
 export default DashboardPage;

@@ -11,9 +11,20 @@ interface AuthState {
   token: string | null;
 }
 
+const getUser = () => {
+  const local = localStorage.getItem("user");
+  const session = sessionStorage.getItem("user");
+
+  return JSON.parse(local || session || "null");
+};
+
+const getToken = () => {
+  return localStorage.getItem("token") || sessionStorage.getItem("token");
+};
+
 const initialState: AuthState = {
-  user: JSON.parse(localStorage.getItem("user") || "null"),
-  token: localStorage.getItem("token"),
+  user: getUser(),
+  token: getToken(),
 };
 
 const authSlice = createSlice({
@@ -27,6 +38,10 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("token");
     },
   },
 });

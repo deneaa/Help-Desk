@@ -7,7 +7,7 @@ import {
   type Category,
   type Priority,
 } from "../types/types";
-import type { RootState } from "../app/store";
+import type { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
 
 interface IForm {
