@@ -46,8 +46,4 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "author")
-    private List<Comment> comments;
 }

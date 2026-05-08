@@ -1,10 +1,7 @@
 package com.helpdesk.model.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -16,7 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Comment {
 
     @Id
@@ -24,7 +20,6 @@ public class Comment {
     private Long id;
 
     @NotBlank
-    @Size(max = 5000)
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -36,12 +31,11 @@ public class Comment {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ticket_id", nullable = false)
-    @JsonBackReference
     private Ticket ticket;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 }

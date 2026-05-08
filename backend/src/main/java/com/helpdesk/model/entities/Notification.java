@@ -1,5 +1,6 @@
 package com.helpdesk.model.entities;
 
+import com.helpdesk.model.enums.NotificationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -21,6 +22,9 @@ public class Notification {
     @NotBlank
     @Column(nullable = false)
     private String message;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
 
     @Builder.Default
     @Column(nullable = false)

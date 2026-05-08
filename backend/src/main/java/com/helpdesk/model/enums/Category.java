@@ -4,5 +4,6 @@ public enum Category {
     IT,
     HR,
     NETWORK,
-    SOFTWARE
+    SOFTWARE,
+    GENERAL
 }
