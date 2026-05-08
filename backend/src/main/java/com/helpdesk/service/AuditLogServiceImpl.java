@@ -31,6 +31,6 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public List<AuditLog> getVisibleLogsByTicket(Long ticketId) {
-        return auditLogRepository.findByTicketIdAndIsVisibleToUser(ticketId, true);
+        return auditLogRepository.findByTicket_IdAndIsVisibleToUser(ticketId, true);
     }
 }

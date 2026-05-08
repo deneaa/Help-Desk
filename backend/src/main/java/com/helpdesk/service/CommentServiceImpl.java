@@ -26,12 +26,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> getCommentsByTicket(Long ticketId) {
-        return commentRepository.findByTicketId(ticketId);
+        return commentRepository.findByTicket_Id(ticketId);
     }
 
     @Override
     public List<Comment> getPublicCommentsByTicket(Long ticketId) {
-        return commentRepository.findByTicketIdAndIsInternal(ticketId, false);
+        return commentRepository.findByTicket_IdAndIsInternal(ticketId, false);
     }
 
     @Override

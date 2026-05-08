@@ -3,6 +3,7 @@ package com.helpdesk.model.entities;
 import com.helpdesk.model.enums.Category;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
+import com.helpdesk.model.enums.TicketType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,10 @@ public class Ticket {
     @Size(max = 5000)
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketType ticketType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

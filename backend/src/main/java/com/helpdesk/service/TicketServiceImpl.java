@@ -68,7 +68,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public List<TicketDTO> getTicketsByUser(Long userId) {
-        return ticketRepository.findByCreatedById(userId)
+        return ticketRepository.findByCreatedBy_Id(userId)
                 .stream()
                 .map(TicketMapper::toDTO)
                 .toList();

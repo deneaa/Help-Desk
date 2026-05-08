@@ -7,6 +7,10 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    List<Comment> findByTicketId(Long ticketId);
-    List<Comment> findByTicketIdAndIsInternal(Long ticketId, boolean isInternal);
+
+    List<Comment> findByTicket_Id(Long ticketId);
+
+    List<Comment> findByTicket_IdAndIsInternal(Long ticketId, boolean isInternal);
+
+    List<Comment> findByAuthor_Id(Long authorId);
 }

@@ -8,6 +8,5 @@ import java.util.List;
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByTicketId(Long ticketId);
-    List<AuditLog> findByTicketIdAndIsVisibleToUser(Long ticketId, boolean isVisibleToUser);
+    List<AuditLog> findByTicket_IdAndIsVisibleToUser(Long ticketId, boolean isVisibleToUser);
 }
-// JpaRepository ne ofera niste metode in plus si automat functiile scrise sunt generate
