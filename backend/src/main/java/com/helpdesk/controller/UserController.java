@@ -1,9 +1,8 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.auth.UserRequestDTO;
-import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.dto.user.UserResponseDTO;
-import com.helpdesk.model.entities.User;
 import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.model.interfaces.UserService;
 import jakarta.validation.Valid;
@@ -31,7 +30,7 @@ public class UserController {
     }
 
     @GetMapping("{userId}/tickets")
-    public List<TicketDTO> getTicketsByUser(@PathVariable Long userId){
+    public List<TicketResponseDTO> getTicketsByUser(@PathVariable Long userId){
         return ticketService.getTicketsByUser(userId);
     }
  }

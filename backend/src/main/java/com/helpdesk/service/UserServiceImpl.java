@@ -28,12 +28,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO createUser( UserRequestDTO dto) {
-        User user = User.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .role(Role.USER)
-                .build();
+        User user = UserMapper.toEntity(dto);
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(Role.USER);
 
         User saved = userRepository.save(user);
 
@@ -111,40 +109,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.AGENT);
 
         return UserMapper.toUserDTO(userRepository.save(user));
-    }
-
-    @Override
-    public User login(LoginRequestDTO dto) {
-
-        User user = userRepository.findByEmailIgnoreCase(dto.getEmail())
-                .orElseThrow(() -> InvalidCredentialsException.emailNotFound(dto.getEmail()));
-
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw InvalidCredentialsException.wrongPassword();
-        }
-
-        return user;
-    }
-
-    @Override
-    public User register(UserRequestDTO dto) {
-
-        if (userRepository.findByEmailIgnoreCase(dto.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("email", dto.getEmail());
-        }
-
-        if (userRepository.findByNameIgnoreCase(dto.getName()).isPresent()) {
-            throw new UserAlreadyExistsException("name", dto.getName());
-        }
-
-        User user = User.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .role(Role.USER)
-                .build();
-
-        return userRepository.save(user);
     }
 
 }

@@ -3,6 +3,7 @@ package com.helpdesk.model.dto.ticket;
 import com.helpdesk.model.enums.Category;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
+import com.helpdesk.model.enums.TicketType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class TicketDTO {
+public class TicketResponseDTO {
 
     private Long id;
 
@@ -22,6 +23,7 @@ public class TicketDTO {
     private Status status;
     private Category category;
     private Priority priority;
+    private TicketType ticketType;
 
     private Long createdById;
     private String createdByName;

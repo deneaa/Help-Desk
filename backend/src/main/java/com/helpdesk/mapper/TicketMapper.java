@@ -1,13 +1,13 @@
 package com.helpdesk.mapper;
 
 import com.helpdesk.model.dto.ticket.CreateTicketDTO;
-import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.entities.Ticket;
 
 public class TicketMapper {
 
-    public static TicketDTO toDTO(Ticket ticket) {
-        return TicketDTO.builder()
+    public static TicketResponseDTO toDTO(Ticket ticket) {
+        return TicketResponseDTO.builder()
                 .id(ticket.getId())
                 .title(ticket.getTitle())
                 .description(ticket.getDescription())
@@ -30,6 +30,7 @@ public class TicketMapper {
         Ticket ticket = new Ticket();
         ticket.setTitle(dto.getTitle());
         ticket.setPriority(dto.getPriority());
+        ticket.setTicketType(dto.getTicketType());
         ticket.setDescription(dto.getDescription());
         ticket.setCategory(dto.getCategory());
         return ticket;

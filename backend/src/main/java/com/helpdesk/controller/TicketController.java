@@ -16,33 +16,37 @@ public class TicketController {
 
     private final TicketService ticketService;
 
-    // CREATE
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TicketDTO create(@Valid @RequestBody CreateTicketDTO dto) {
+    public TicketResponseDTO create(@Valid @RequestBody CreateTicketDTO dto) {
         return ticketService.createTicket(dto);
     }
 
-    // GET ALL (cu limit optional)
     @GetMapping
-    public List<TicketDTO> getAll(@RequestParam(defaultValue = "10") int limit) {
+    public List<TicketResponseDTO> getAll(@RequestParam(defaultValue = "10") int limit) {
         return ticketService.getAllTickets(limit);
     }
 
-    // LATEST
+    @PatchMapping("/{ticketId}")
+    public TicketResponseDTO updateTicket(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody UpdateTicketDTO dto) {
+        return ticketService.updateTicket(ticketId, dto);
+    }
+
+
     @GetMapping("/latest")
-    public List<TicketDTO> getLatest(@RequestParam(defaultValue = "10") int limit) {
+    public List<TicketResponseDTO> getLatest(@RequestParam(defaultValue = "10") int limit) {
         return ticketService.getLastTickets(limit);
     }
 
-    @GetMapping("/{id}")
-    public TicketDTO getTicket(@PathVariable Long id){
-        return ticketService.getTicketById(id);
+    @GetMapping("/{ticketId}")
+    public TicketResponseDTO getTicket(@PathVariable Long ticketId){
+        return ticketService.getTicketById(ticketId);
     }
 
-    // ASSIGN
     @PatchMapping("/{ticketId}/assign")
-    public TicketDTO assign(
+    public TicketResponseDTO assign(
             @PathVariable Long ticketId,
             @Valid @RequestBody AssignRequestDTO request
     ) {
@@ -50,13 +54,12 @@ public class TicketController {
     }
 
     @PatchMapping("/{ticketId}/unassign")
-    public TicketDTO unassign(@PathVariable Long ticketId){
+    public TicketResponseDTO unassign(@PathVariable Long ticketId){
         return ticketService.unassignTicket(ticketId);
     }
 
-    // STATUS
     @PatchMapping("/{ticketId}/status")
-    public TicketDTO changeStatus(
+    public TicketResponseDTO changeStatus(
             @PathVariable Long ticketId,
             @Valid @RequestBody ChangeStatusRequestDTO request
     ) {
@@ -64,9 +67,16 @@ public class TicketController {
     }
 
     @PatchMapping("/{ticketId}/priority")
-    public TicketDTO changePriority(
+    public TicketResponseDTO changePriority(
             @PathVariable Long ticketId,
             @Valid @RequestBody ChangePriorityRequestDTO request){
         return ticketService.changePriority(ticketId, request.getPriority());
+    }
+
+    @PatchMapping("/{ticketId}/ticketType")
+    public TicketResponseDTO changeTicketType(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody ChangeTicketTypeRequestDTO request){
+        return ticketService.changeTicketType(ticketId, request.getType());
     }
 }

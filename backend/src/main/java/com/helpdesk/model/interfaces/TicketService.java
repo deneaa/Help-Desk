@@ -1,33 +1,37 @@
 package com.helpdesk.model.interfaces;
 
 import com.helpdesk.model.dto.ticket.CreateTicketDTO;
-import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.dto.ticket.TicketResponseDTO;
+import com.helpdesk.model.dto.ticket.UpdateTicketDTO;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
+import com.helpdesk.model.enums.TicketType;
 
 import java.util.List;
 
 public interface TicketService {
 
-    TicketDTO createTicket(CreateTicketDTO createTicketDTO);
+    TicketResponseDTO createTicket(CreateTicketDTO dto);
 
-    TicketDTO getTicketById(Long id);
+    TicketResponseDTO getTicketById(Long id);
 
-    List<TicketDTO> getAllTickets(int limit);
+    List<TicketResponseDTO> getAllTickets(int limit);
 
-    List<TicketDTO> getTicketsByUser(Long userId);
+    List<TicketResponseDTO> getTicketsByUser(Long userId);
 
-    TicketDTO updateTicket(Long id, TicketDTO ticketDTO);
+    TicketResponseDTO updateTicket(Long id, UpdateTicketDTO dto);
 
-    TicketDTO assignTicket(Long ticketId, Long agentId);
+    TicketResponseDTO assignTicket(Long ticketId, Long agentId);
 
-    TicketDTO unassignTicket (Long ticketId);
+    TicketResponseDTO unassignTicket (Long ticketId);
 
-    TicketDTO changeStatus(Long ticketId, Status status);
+    TicketResponseDTO changeStatus(Long ticketId, Status status);
 
-    TicketDTO changePriority(Long ticketId, Priority priority);
+    TicketResponseDTO changePriority(Long ticketId, Priority priority);
+
+    TicketResponseDTO changeTicketType(Long ticketId, TicketType type);
 
     void deleteTicket(Long id);
 
-    List<TicketDTO> getLastTickets(int limit);
+    List<TicketResponseDTO> getLastTickets(int limit);
 }

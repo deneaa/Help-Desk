@@ -1,5 +1,6 @@
 package com.helpdesk.model.dto.user;
 
+import com.helpdesk.model.enums.Role;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,6 @@ public class UserResponseDTO {
     private Long id;
     private String name;
     private String email;
-    private String role;
+    private Role role;
     private LocalDateTime createdAt;
 }
