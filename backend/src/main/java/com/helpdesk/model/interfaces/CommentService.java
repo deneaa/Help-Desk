@@ -1,12 +1,14 @@
 package com.helpdesk.model.interfaces;
 
+import com.helpdesk.model.dto.comment.CommentResponseDTO;
+import com.helpdesk.model.dto.comment.CreateCommentRequestDTO;
 import com.helpdesk.model.entities.Comment;
 import java.util.List;
 
 public interface CommentService {
-    Comment addComment(Comment comment);
-    List<Comment> getCommentsByTicket(Long ticketId);
-    List<Comment> getPublicCommentsByTicket(Long ticketId);
+    CommentResponseDTO addComment(CreateCommentRequestDTO dto);
+    List<CommentResponseDTO> getCommentsByTicket(Long ticketId);
+    List<CommentResponseDTO> getPublicCommentsByTicket(Long ticketId);
     void deleteComment(Long id);
-    List<Comment> getAllComments();
+    List<CommentResponseDTO> getAllComments();
 }
