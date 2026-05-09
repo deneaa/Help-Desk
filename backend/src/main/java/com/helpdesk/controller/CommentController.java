@@ -2,8 +2,9 @@ package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.comment.CommentResponseDTO;
 import com.helpdesk.model.dto.comment.CreateCommentRequestDTO;
-import com.helpdesk.model.entities.Comment;
+import com.helpdesk.model.dto.comment.EditCommentRequestDTO;
 import com.helpdesk.model.interfaces.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +44,14 @@ public class CommentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         commentService.deleteComment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDTO> update(
+            @PathVariable Long commentId,
+            @RequestBody @Valid EditCommentRequestDTO dto
+    ) {
+        CommentResponseDTO response = commentService.updateComment(commentId, dto);
+        return ResponseEntity.ok(response);
     }
 }

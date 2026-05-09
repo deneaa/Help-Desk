@@ -1,11 +1,13 @@
 package com.helpdesk.service;
 
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
+import com.helpdesk.exceptions.comment.CommentNotFoundException;
 import com.helpdesk.exceptions.ticket.TicketNotFoundException;
 import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.CommentMapper;
 import com.helpdesk.model.dto.comment.CommentResponseDTO;
 import com.helpdesk.model.dto.comment.CreateCommentRequestDTO;
+import com.helpdesk.model.dto.comment.EditCommentRequestDTO;
 import com.helpdesk.model.entities.Comment;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
@@ -64,8 +66,16 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentResponseDTO> getCommentsByTicket(Long ticketId) {
-        return commentRepository.findByTicket_Id(ticketId)
-                .stream()
+
+        UserPrincipal userPrincipal =
+                (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userPrincipal.getUser();
+
+        List<Comment> comments = commentRepository.findByTicket_Id(ticketId);
+
+        return comments.stream()
+                .filter(c -> !c.isInternal() || user.getRole() == Role.AGENT || user.getRole() == Role.ADMIN)
                 .map(CommentMapper::toDTO)
                 .toList();
     }
@@ -82,4 +92,18 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
     }
+
+    @Override
+    public CommentResponseDTO updateComment(Long commentId, EditCommentRequestDTO dto) {
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+
+        comment.setContent(dto.getContent());
+
+        Comment saved = commentRepository.save(comment);
+
+        return CommentMapper.toDTO(saved);
+    }
+
 }
