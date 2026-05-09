@@ -1,9 +1,12 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.ticket.TicketDTO;
+import com.helpdesk.model.dto.user.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.model.interfaces.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +21,12 @@ public class UserController {
     private final TicketService ticketService;
 
     @PostMapping
-    public User create(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserResponseDTO create(@RequestBody @Valid UserRequestDTO dto) {
+        return userService.createUser(dto);
     }
 
     @GetMapping
-    public List<User> getAll() {
+    public List<UserResponseDTO> getAll() {
         return userService.getAllUsers();
     }
 

@@ -1,10 +1,19 @@
 package com.helpdesk.service;
 
+import com.helpdesk.exceptions.auth.InvalidCredentialsException;
+import com.helpdesk.exceptions.user.UserAlreadyExistsException;
+import com.helpdesk.mapper.UserMapper;
+import com.helpdesk.model.dto.auth.LoginRequestDTO;
+import com.helpdesk.model.dto.auth.UserRequestDTO;
+import com.helpdesk.model.dto.user.UpdateUserDTO;
+import com.helpdesk.model.dto.user.UserResponseDTO;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.UserService;
 import com.helpdesk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,28 +27,59 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public UserResponseDTO createUser( UserRequestDTO dto) {
+        User user = User.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .role(Role.USER)
+                .build();
+
+        User saved = userRepository.save(user);
+
+        return UserMapper.toUserDTO(saved);
+
     }
 
     @Override
-    public User getUserById(Long id) {
+    public UserResponseDTO getUserById(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserMapper.toUserDTO(user);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toUserDTO)
+                .toList();
+    }
+
+    private User getUserByIdEntity(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    public UserResponseDTO updateUser(Long id, UpdateUserDTO dto) {
 
-    @Override
-    public User updateUser(Long id, User user) {
-        User existing = getUserById(id);
-        existing.setName(user.getName());
-        existing.setEmail(user.getEmail());
-        return userRepository.save(existing);
+        User existing = getUserByIdEntity(id);
+
+        if (dto.getName() != null) {
+            existing.setName(dto.getName());
+        }
+
+        if (dto.getEmail() != null) {
+            existing.setEmail(dto.getEmail());
+        }
+
+        User saved = userRepository.save(existing);
+
+        return UserMapper.toUserDTO(saved);
     }
 
     @Override
@@ -47,12 +87,64 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmailIgnoreCase(email);
+    public Optional<UserResponseDTO> getUserByEmail(String email) {
+
+        return userRepository.findByEmailIgnoreCase(email)
+                .map(UserMapper::toUserDTO);
     }
 
-    public Optional<User> getUserByName(String name){
-        return userRepository.findByNameIgnoreCase(name);
+    public Optional<UserResponseDTO> getUserByName(String name) {
+
+        return userRepository.findByNameIgnoreCase(name)
+                .map(UserMapper::toUserDTO);
+    }
+
+    @Override
+    public UserResponseDTO setAgent(Long id) {
+
+        User user = getUserByIdEntity(id);
+
+        if (user.getRole() == Role.ADMIN) {
+            return UserMapper.toUserDTO(user);
+        }
+
+        user.setRole(Role.AGENT);
+
+        return UserMapper.toUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public User login(LoginRequestDTO dto) {
+
+        User user = userRepository.findByEmailIgnoreCase(dto.getEmail())
+                .orElseThrow(() -> InvalidCredentialsException.emailNotFound(dto.getEmail()));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw InvalidCredentialsException.wrongPassword();
+        }
+
+        return user;
+    }
+
+    @Override
+    public User register(UserRequestDTO dto) {
+
+        if (userRepository.findByEmailIgnoreCase(dto.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("email", dto.getEmail());
+        }
+
+        if (userRepository.findByNameIgnoreCase(dto.getName()).isPresent()) {
+            throw new UserAlreadyExistsException("name", dto.getName());
+        }
+
+        User user = User.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .role(Role.USER)
+                .build();
+
+        return userRepository.save(user);
     }
 
 }

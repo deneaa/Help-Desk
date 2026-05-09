@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponseDTO {
+public class AuthResponseDTO {
 
     private Long id;
     private String name;
