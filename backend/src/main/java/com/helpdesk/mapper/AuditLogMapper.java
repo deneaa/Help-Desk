@@ -8,17 +8,18 @@ public class AuditLogMapper {
     public static AuditLogResponseDTO toDTO(AuditLog log) {
         return AuditLogResponseDTO.builder()
                 .id(log.getId())
-                .action(log.getAction().name())
+                .type(log.getType())
+                .action(log.getAction())
                 .entityType(log.getEntityType())
                 .entityId(log.getEntityId())
-                .fieldName(log.getFieldName())
-                .oldValue(log.getOldValue())
-                .newValue(log.getNewValue())
-                .visibleToUser(log.isVisibleToUser())
+                .beforeData(log.getBeforeData())
+                .afterData(log.getAfterData())
                 .changedAt(log.getChangedAt())
-                .changedByName(log.getChangedBy() != null
-                        ? log.getChangedBy().getName()
-                        : null)
+                .changedByName(
+                        log.getChangedBy() != null
+                                ? log.getChangedBy().getName()
+                                : null
+                )
                 .build();
     }
 }

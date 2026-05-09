@@ -1,5 +1,6 @@
 package com.helpdesk.model.dto.auditLog;
 
+import com.helpdesk.model.enums.AuditType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,16 +13,15 @@ import java.time.LocalDateTime;
 public class AuditLogResponseDTO {
 
     private Long id;
+    private AuditType type;
     private String action;
 
     private String entityType;
     private Long entityId;
 
-    private String fieldName;
-    private String oldValue;
-    private String newValue;
+    private String beforeData;
+    private String afterData;
 
-    private boolean visibleToUser;
 
     private LocalDateTime changedAt;
     private String changedByName;

@@ -31,6 +31,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketDTO createTicket(CreateTicketDTO dto) {
+
         UserPrincipal userPrincipal =
                 (UserPrincipal) SecurityContextHolder
                         .getContext()
@@ -43,11 +44,85 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setCreatedBy(user);
         ticket.setStatus(Status.OPEN);
-
         ticket.setCreatedAt(LocalDateTime.now());
         ticket.setUpdatedAt(LocalDateTime.now());
 
         return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public TicketDTO updateTicket(Long id, TicketDTO dto) {
+
+        Ticket existing = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        existing.setTitle(dto.getTitle());
+        existing.setDescription(dto.getDescription());
+        existing.setCategory(dto.getCategory());
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        return TicketMapper.toDTO(ticketRepository.save(existing));
+    }
+
+
+    @Override
+    public TicketDTO assignTicket(Long ticketId, Long agentId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User agent = userRepository.findById(agentId)
+                .orElseThrow(() -> new RuntimeException("Agent not found"));
+
+        if (agent.getRole() != Role.AGENT) {
+            throw new NotAnAgentException(agentId);
+        }
+
+        ticket.setAssignedTo(agent);
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public TicketDTO changeStatus(Long ticketId, Status status) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        ticket.setStatus(status);
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public TicketDTO unassignTicket(Long ticketId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        ticket.setAssignedTo(null);
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public TicketDTO changePriority(Long ticketId, Priority priority) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        ticket.setPriority(priority);
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public void deleteTicket(Long id) {
+        ticketRepository.deleteById(id);
     }
 
     @Override
@@ -75,71 +150,6 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketDTO updateTicket(Long id, TicketDTO dto) {
-        Ticket existing = ticketRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        existing.setTitle(dto.getTitle());
-        existing.setDescription(dto.getDescription());
-        existing.setCategory(dto.getCategory());
-        existing.setUpdatedAt(LocalDateTime.now());
-
-        return TicketMapper.toDTO(ticketRepository.save(existing));
-    }
-
-    @Override
-    public TicketDTO assignTicket(Long ticketId, Long agentId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new RuntimeException("Agent not found"));
-
-        if (agent.getRole() != Role.AGENT){
-            throw new NotAnAgentException(agentId);
-        }
-
-        ticket.setAssignedTo(agent);
-        ticket.setUpdatedAt(LocalDateTime.now());
-
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
-    }
-
-    @Override
-    public TicketDTO changeStatus(Long ticketId, Status status) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
-
-        ticket.setStatus(status);
-        ticket.setUpdatedAt(LocalDateTime.now());
-
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
-    }
-
-    @Override
-    public TicketDTO unassignTicket(Long ticketId){
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
-        ticket.setAssignedTo(null);
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
-    }
-
-    @Override
-    public TicketDTO changePriority(Long ticketId, Priority priority){
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
-
-        ticket.setPriority(priority);
-        ticket.setUpdatedAt(LocalDateTime.now());
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
-    }
-
-    @Override
-    public void deleteTicket(Long id) {
-        ticketRepository.deleteById(id);
-    }
-
-    @Override
     public List<TicketDTO> getLastTickets(int limit) {
         return ticketRepository
                 .findAllByOrderByCreatedAtDesc(PageRequest.of(0, limit))
@@ -148,5 +158,4 @@ public class TicketServiceImpl implements TicketService {
                 .map(TicketMapper::toDTO)
                 .toList();
     }
-
 }

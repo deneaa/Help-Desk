@@ -1,8 +1,7 @@
 package com.helpdesk.model.entities;
 
-import com.helpdesk.model.enums.AuditAction;
+import com.helpdesk.model.enums.AuditType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
@@ -21,7 +20,10 @@ public class AuditLog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AuditAction action;
+    private AuditType type;
+
+    @Column(nullable = false)
+    private String action;
 
     @Column(name = "entity_type", nullable = false)
     private String entityType;
@@ -30,17 +32,10 @@ public class AuditLog {
     private Long entityId;
 
     @Column(columnDefinition = "TEXT")
-    private String fieldName;
+    private String beforeData;
 
     @Column(columnDefinition = "TEXT")
-    private String oldValue;
-
-    @Column(columnDefinition = "TEXT")
-    private String newValue;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean isVisibleToUser = true;
+    private String afterData;
 
     @CreationTimestamp
     @Column(name = "changed_at", nullable = false, updatable = false)

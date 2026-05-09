@@ -1,15 +1,20 @@
 package com.helpdesk.model.dto.auditLog;
 
-import com.helpdesk.model.enums.AuditAction;
+import com.helpdesk.model.enums.AuditType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class CreateAuditLogRequestDTO {
 
     @NotNull
-    private AuditAction action;
+    private AuditType type;
+
+    @NotNull
+    private String action;
 
     @NotNull
     private String entityType;
@@ -17,12 +22,7 @@ public class CreateAuditLogRequestDTO {
     @NotNull
     private Long entityId;
 
-    @NotBlank
-    private String fieldName;
+    private String beforeData;
 
-    private String oldValue;
-
-    private String newValue;
-
-    private boolean visibleToUser;
+    private String afterData;
 }
