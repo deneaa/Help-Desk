@@ -1,5 +1,9 @@
 package com.helpdesk.service;
 
+import com.helpdesk.exceptions.auth.UnauthorizedActionException;
+import com.helpdesk.exceptions.ticket.TicketAlreadyAssignedException;
+import com.helpdesk.exceptions.ticket.TicketAlreadyClosedException;
+import com.helpdesk.exceptions.ticket.TicketAlreadyUnassignedException;
 import com.helpdesk.exceptions.ticket.TicketNotFoundException;
 import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.TicketMapper;
@@ -16,6 +20,7 @@ import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,23 +29,43 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
 
+    private User getAuthenticatedUser() {
+
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserPrincipal userPrincipal)) {
+            throw new UnauthorizedActionException("Unauthorized");
+        }
+
+        return userPrincipal.getUser();
+    }
+
+    private Ticket getTicketByIdEntity(Long id) {
+
+        return ticketRepository.findById(id)
+                .orElseThrow(() -> new TicketNotFoundException(id));
+    }
+
+    private User getUserByIdEntity(Long id) {
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     @Override
     public TicketResponseDTO createTicket(CreateTicketDTO dto) {
 
-        UserPrincipal userPrincipal =
-                (UserPrincipal) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getPrincipal();
-
-        User user = userPrincipal.getUser();
-
+        User user = getAuthenticatedUser();
         Ticket ticket = TicketMapper.toEntity(dto);
 
         ticket.setCreatedBy(user);
@@ -53,27 +78,60 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponseDTO updateTicket(Long id, UpdateTicketDTO dto) {
 
-        Ticket existing = ticketRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        User authenticatedUser = getAuthenticatedUser();
 
-        existing.setTitle(dto.getTitle());
-        existing.setDescription(dto.getDescription());
+        Ticket ticket = getTicketByIdEntity(id);
 
-        return TicketMapper.toDTO(ticketRepository.save(existing));
+        boolean isOwner = ticket.getCreatedBy().getId().equals(authenticatedUser.getId());
+
+        if (!isOwner){
+            throw new UnauthorizedActionException("You cannot update this ticket");
+        }
+
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
+        }
+
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            ticket.setTitle(dto.getTitle().trim());
+        }
+
+        if (dto.getDescription() != null &&
+                !dto.getDescription().isBlank()) {
+
+            ticket.setDescription(dto.getDescription().trim());
+        }
+
+        Ticket saved = ticketRepository.save(ticket);
+
+        return TicketMapper.toDTO(saved);
     }
 
 
     @Override
     public TicketResponseDTO assignTicket(Long ticketId, Long agentId) {
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        User authenticatedUser = getAuthenticatedUser();
 
-        User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new RuntimeException("Agent not found"));
+        Ticket ticket = getTicketByIdEntity(ticketId);
 
-        if (agent.getRole() != Role.AGENT) {
+        if (authenticatedUser.getRole() != Role.AGENT
+                && authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("Only Admins and Agents can assign tickets");
+        }
+
+        User agent = getUserByIdEntity(agentId);
+
+        if (agent.getRole() != Role.AGENT){
             throw new NotAnAgentException(agentId);
+        }
+
+        if (ticket.getAssignedTo() != null && ticket.getAssignedTo().getId().equals(agentId)){
+            throw new TicketAlreadyAssignedException();
+        }
+
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
         }
 
         ticket.setAssignedTo(agent);
@@ -84,8 +142,22 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponseDTO changeStatus(Long ticketId, Status status) {
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+        User authenticatedUser = getAuthenticatedUser();
+
+        Ticket ticket = getTicketByIdEntity(ticketId);
+
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+
+        boolean isAssignedAgent = ticket.getAssignedTo() != null &&
+                ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
+
+        if (!isAssignedAgent && !isAdmin){
+            throw new UnauthorizedActionException("You cannot change the ticket status");
+        }
+
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
+        }
 
         ticket.setStatus(status);
 
@@ -94,8 +166,23 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponseDTO changeTicketType(Long ticketId, TicketType type) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        User authenticatedUser = getAuthenticatedUser();
+
+        Ticket ticket = getTicketByIdEntity(ticketId);
+
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+
+        boolean isAssignedAgent = ticket.getAssignedTo() != null &&
+                ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
+
+        if (!isAssignedAgent && !isAdmin){
+            throw new UnauthorizedActionException("You cannot change the ticket type");
+        }
+
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
+        }
 
         ticket.setTicketType(type);
 
@@ -106,8 +193,31 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponseDTO unassignTicket(Long ticketId) {
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+        User authenticatedUser = getAuthenticatedUser();
+
+        Ticket ticket = getTicketByIdEntity(ticketId);
+
+        boolean isAdmin =
+                authenticatedUser.getRole() == Role.ADMIN;
+
+        boolean isAssignedAgent =
+                ticket.getAssignedTo() != null &&
+                        ticket.getAssignedTo().getId()
+                                .equals(authenticatedUser.getId());
+
+        if (!isAssignedAgent && !isAdmin) {
+            throw new UnauthorizedActionException(
+                    "You cannot unassign this ticket"
+            );
+        }
+
+        if (ticket.getAssignedTo() == null) {
+            throw new TicketAlreadyUnassignedException();
+        }
+
+        if (ticket.getStatus() == Status.CLOSED) {
+            throw new TicketAlreadyClosedException();
+        }
 
         ticket.setAssignedTo(null);
 
@@ -117,8 +227,22 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponseDTO changePriority(Long ticketId, Priority priority) {
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+        User authenticatedUser = getAuthenticatedUser();
+
+        Ticket ticket = getTicketByIdEntity(ticketId);
+
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+
+        boolean isAssignedAgent = ticket.getAssignedTo() != null &&
+                ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
+
+        if (!isAssignedAgent && !isAdmin){
+            throw new UnauthorizedActionException("You cannot change the ticket priority");
+        }
+
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
+        }
 
         ticket.setPriority(priority);
 
@@ -127,14 +251,21 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void deleteTicket(Long id) {
-        ticketRepository.deleteById(id);
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("Only Admins can delete tickets");
+        }
+        Ticket ticket = getTicketByIdEntity(id);
+
+        ticketRepository.delete(ticket);
     }
 
     @Override
     public TicketResponseDTO getTicketById(Long id) {
         return ticketRepository.findById(id)
                 .map(TicketMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketNotFoundException(id));
     }
 
     @Override
@@ -148,6 +279,16 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public List<TicketResponseDTO> getTicketsByUser(Long userId) {
+        User authenticatedUser = getAuthenticatedUser();
+
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isOwner = authenticatedUser.getId().equals(userId);
+
+        if (!isAdmin && !isOwner) {
+            throw new UnauthorizedActionException(
+                    "You cannot view these tickets"
+            );
+        }
         return ticketRepository.findByCreatedBy_Id(userId)
                 .stream()
                 .map(TicketMapper::toDTO)
