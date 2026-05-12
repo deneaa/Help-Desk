@@ -2,6 +2,7 @@ package com.helpdesk.service;
 
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.exceptions.comment.CommentNotFoundException;
+import com.helpdesk.exceptions.comment.ForbiddenCommentActionException;
 import com.helpdesk.exceptions.ticket.TicketNotFoundException;
 import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.CommentMapper;
@@ -90,7 +91,23 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
+
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new CommentNotFoundException(id));
+
+        UserPrincipal userPrincipal =
+                (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userPrincipal.getUser();
+
+        boolean isOwner = comment.getAuthor().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenCommentActionException();
+        }
+
+        commentRepository.delete(comment);
     }
 
     @Override

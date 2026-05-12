@@ -17,4 +17,5 @@ public interface UserService {
     Optional<UserResponseDTO> getUserByEmail(String email);
     Optional<UserResponseDTO> getUserByName(String name);
     UserResponseDTO setAgent(Long id);
+    UserResponseDTO removeAgent(Long id);
 }

@@ -1,6 +1,9 @@
 package com.helpdesk.service;
 
 import com.helpdesk.exceptions.auth.InvalidCredentialsException;
+import com.helpdesk.exceptions.auth.UnauthorizedActionException;
+import com.helpdesk.exceptions.user.NotAnAgentException;
+import com.helpdesk.exceptions.user.UserAlreadyAgentException;
 import com.helpdesk.exceptions.user.UserAlreadyExistsException;
 import com.helpdesk.mapper.UserMapper;
 import com.helpdesk.model.dto.auth.LoginRequestDTO;
@@ -11,13 +14,16 @@ import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.UserService;
 import com.helpdesk.repository.UserRepository;
+import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.ErrorResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +32,27 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private User getUserByIdEntity(Long id) {
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private User getAuthenticatedUser() {
+
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserPrincipal userPrincipal)) {
+            throw new UnauthorizedActionException("Unauthorized");
+        }
+
+        return userPrincipal.getUser();
+    }
+
     @Override
-    public UserResponseDTO createUser( UserRequestDTO dto) {
+    public UserResponseDTO createUser(UserRequestDTO dto) {
         User user = UserMapper.toEntity(dto);
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -42,8 +67,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getUserById(Long id) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = getUserByIdEntity(id);
 
         return UserMapper.toUserDTO(user);
     }
@@ -57,21 +81,32 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
-    private User getUserByIdEntity(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
     @Override
     public UserResponseDTO updateUser(Long id, UpdateUserDTO dto) {
 
+        User authenticatedUser = getAuthenticatedUser();
         User existing = getUserByIdEntity(id);
 
-        if (dto.getName() != null) {
-            existing.setName(dto.getName());
+        if (!authenticatedUser.getId().equals(id) &&
+            authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("You cannot update this user!");
         }
 
-        if (dto.getEmail() != null) {
+        if (dto.getName() != null && !dto.getName().isBlank()){
+            boolean nameExists = userRepository.existsByNameIgnoreCase(dto.getName());
+
+            if (nameExists && !existing.getName().equalsIgnoreCase(dto.getName())) {
+                throw new UserAlreadyExistsException("username", dto.getName());
+            }
+            existing.setName(dto.getName().trim());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()){
+            boolean emailExists = userRepository.existsByEmailIgnoreCase(dto.getEmail());
+
+            if (emailExists && !existing.getEmail().equalsIgnoreCase(dto.getEmail())){
+                throw new UserAlreadyExistsException("email", dto.getEmail());
+            }
             existing.setEmail(dto.getEmail());
         }
 
@@ -82,6 +117,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("Only admins can delete users");
+        }
+
+        User userToDelete = getUserByIdEntity(id);
+
+        if (authenticatedUser.getId().equals(userToDelete.getId())){
+            throw new UnauthorizedActionException("Admins cannot delete themselves");
+        }
         userRepository.deleteById(id);
     }
 
@@ -100,15 +146,49 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO setAgent(Long id) {
 
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can change roles");
+        }
+
         User user = getUserByIdEntity(id);
 
         if (user.getRole() == Role.ADMIN) {
-            return UserMapper.toUserDTO(user);
+            throw new UnauthorizedActionException("Admin role cannot be modified");
+        }
+
+        if (user.getRole() == Role.AGENT) {
+            throw new UserAlreadyAgentException("User is already an agent");
         }
 
         user.setRole(Role.AGENT);
 
+        User saved = userRepository.save(user);
+
         return UserMapper.toUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponseDTO removeAgent(Long id){
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("Only admins can remove agents");
+        }
+
+        User user = getUserByIdEntity(id);
+        if (user.getRole() == Role.ADMIN){
+            throw new UnauthorizedActionException("User is already an Admin");
+        }
+
+        if (user.getRole() != Role.AGENT){
+            throw new NotAnAgentException(id);
+        }
+
+        user.setRole(Role.USER);
+        User saved = userRepository.save(user);
+
+        return UserMapper.toUserDTO(saved);
     }
 
 }
