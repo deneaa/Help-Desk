@@ -1,10 +1,12 @@
 package com.helpdesk.service;
 
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
+import com.helpdesk.exceptions.comment.CommentEditTimeExpiredException;
 import com.helpdesk.exceptions.comment.CommentNotFoundException;
+import com.helpdesk.exceptions.comment.EmptyCommentContentException;
 import com.helpdesk.exceptions.comment.ForbiddenCommentActionException;
+import com.helpdesk.exceptions.ticket.TicketAlreadyClosedException;
 import com.helpdesk.exceptions.ticket.TicketNotFoundException;
-import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.CommentMapper;
 import com.helpdesk.model.dto.comment.CommentResponseDTO;
 import com.helpdesk.model.dto.comment.CreateCommentRequestDTO;
@@ -13,6 +15,7 @@ import com.helpdesk.model.entities.Comment;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
+import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.CommentService;
 import com.helpdesk.repository.CommentRepository;
 import com.helpdesk.repository.TicketRepository;
@@ -30,26 +33,58 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final TicketRepository ticketRepository;
 
+    private User getAuthenticatedUser() {
+
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserPrincipal userPrincipal)) {
+            throw new UnauthorizedActionException("Unauthorized");
+        }
+
+        return userPrincipal.getUser();
+    }
+    private void checkCommentEditTime(Comment comment) {
+
+        LocalDateTime limit =
+                comment.getCreatedAt().plusMinutes(15);
+
+        if (LocalDateTime.now().isAfter(limit)) {
+            throw new CommentEditTimeExpiredException();
+        }
+    }
+
+    private Comment getComment(Long id) {
+
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new CommentNotFoundException(id));
+    }
+
+    private Ticket getTicket(Long id) {
+
+        return ticketRepository.findById(id)
+                .orElseThrow(() -> new TicketNotFoundException(id));
+    }
+
     @Override
     public CommentResponseDTO addComment(CreateCommentRequestDTO dto) {
 
-        UserPrincipal userPrincipal =
-                (UserPrincipal) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getPrincipal();
+        User authenticatedUser = getAuthenticatedUser();
 
-        User user = userPrincipal.getUser();
+        Ticket ticket = getTicket(dto.getTicketId());
 
-        Ticket ticket = ticketRepository.findById(dto.getTicketId())
-                .orElseThrow(() -> new TicketNotFoundException(dto.getTicketId()));
+        if (ticket.getStatus() == Status.CLOSED){
+            throw new TicketAlreadyClosedException();
+        }
 
-        if (dto.isInternal() && user.getRole() != Role.AGENT) {
-            throw new UnauthorizedActionException("Only agents can create internal comments");
+        if (dto.isInternal() && authenticatedUser.getRole() == Role.USER){
+            throw new UnauthorizedActionException("Only agents or admins can create internal comments");
         }
 
         Comment comment = CommentMapper.toEntity(dto);
-        comment.setAuthor(user);
+        comment.setAuthor(authenticatedUser);
         comment.setTicket(ticket);
 
         Comment saved = commentRepository.save(comment);
@@ -59,6 +94,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentResponseDTO> getAllComments() {
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != Role.ADMIN){
+            throw new UnauthorizedActionException("Only admins can view all the comments");
+        }
+
         return commentRepository.findAll()
                 .stream()
                 .map(CommentMapper::toDTO)
@@ -68,22 +109,32 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentResponseDTO> getCommentsByTicket(Long ticketId) {
 
-        UserPrincipal userPrincipal =
-                (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User authenticatedUser = getAuthenticatedUser();
 
-        User user = userPrincipal.getUser();
+        if (authenticatedUser.getRole() != Role.ADMIN && authenticatedUser.getRole() != Role.AGENT){
+            throw new UnauthorizedActionException("Only Admins and Agents can get all the comments");
+        }
 
-        List<Comment> comments = commentRepository.findByTicket_Id(ticketId);
-
-        return comments.stream()
-                .filter(c -> !c.isInternal() || user.getRole() == Role.AGENT || user.getRole() == Role.ADMIN)
+        return commentRepository.findByTicket_Id(ticketId)
+                .stream()
                 .map(CommentMapper::toDTO)
                 .toList();
     }
 
     @Override
     public List<CommentResponseDTO> getPublicCommentsByTicket(Long ticketId) {
-        return commentRepository.findByTicket_IdAndIsInternal(ticketId, false)
+
+        User authenticatedUser = getAuthenticatedUser();
+
+        Ticket ticket = getTicket(ticketId);
+
+        if (ticket.getAssignedTo() == null ||
+                !ticket.getAssignedTo().getId().equals(authenticatedUser.getId())) {
+            throw new UnauthorizedActionException("You're not allowed to get the comments");
+        }
+
+        return commentRepository
+                .findByTicket_IdAndIsInternal(ticketId, false)
                 .stream()
                 .map(CommentMapper::toDTO)
                 .toList();
@@ -92,19 +143,22 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Long id) {
 
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new CommentNotFoundException(id));
+        User authenticatedUser = getAuthenticatedUser();
 
-        UserPrincipal userPrincipal =
-                (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Comment comment = getComment(id);
 
-        User user = userPrincipal.getUser();
-
-        boolean isOwner = comment.getAuthor().getId().equals(user.getId());
-        boolean isAdmin = user.getRole() == Role.ADMIN;
+        boolean isOwner = comment.getAuthor().getId().equals(authenticatedUser.getId());
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
             throw new ForbiddenCommentActionException();
+        }
+        if (!isAdmin) {
+            checkCommentEditTime(comment);
+        }
+
+        if (comment.getTicket().getStatus() == Status.CLOSED) {
+            throw new TicketAlreadyClosedException();
         }
 
         commentRepository.delete(comment);
@@ -113,8 +167,28 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponseDTO updateComment(Long commentId, EditCommentRequestDTO dto) {
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
+        User authenticatedUser = getAuthenticatedUser();
+
+        Comment comment = getComment(commentId);
+
+        boolean isOwner = comment.getAuthor().getId().equals(authenticatedUser.getId());
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+
+        if (!isAdmin && !isOwner){
+            throw new ForbiddenCommentActionException();
+        }
+
+        if (!isAdmin){
+            checkCommentEditTime(comment);
+        }
+
+        if (comment.getTicket().getStatus() == Status.CLOSED) {
+            throw new TicketAlreadyClosedException();
+        }
+
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
+            throw new EmptyCommentContentException();
+        }
 
         comment.setContent(dto.getContent());
 
