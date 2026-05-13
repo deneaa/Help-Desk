@@ -1,6 +1,7 @@
 package com.helpdesk.service;
 
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
+import com.helpdesk.exceptions.user.UserNotFoundException;
 import com.helpdesk.mapper.AuditLogMapper;
 import com.helpdesk.model.dto.auditLog.AuditLogResponseDTO;
 import com.helpdesk.model.enums.AuditType;
@@ -8,6 +9,7 @@ import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.AuditLogService;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.repository.AuditLogRepository;
+import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,7 @@ import java.util.List;
 public class AuditLogServiceImpl implements AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
+    private final UserRepository userRepository;
 
     private User getAuthenticatedUser() {
         Object principal = SecurityContextHolder
@@ -39,8 +42,8 @@ public class AuditLogServiceImpl implements AuditLogService {
     public List<AuditLogResponseDTO> getAllLogs() {
         User user = getAuthenticatedUser();
 
-        if (user.getRole() != Role.ADMIN) {
-            throw new UnauthorizedActionException("Only admins can access all logs");
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.AGENT) {
+            throw new UnauthorizedActionException("Only admins and agents can access all logs");
         }
 
         return auditLogRepository.findAll()
@@ -53,8 +56,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     public List<AuditLogResponseDTO> getLogsByEntity(Long entityId, String entityType) {
         User user = getAuthenticatedUser();
 
-        // admin vede tot
-        if (user.getRole() == Role.ADMIN) {
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.AGENT) {
             return auditLogRepository
                     .findByEntityIdAndEntityType(entityId, entityType)
                     .stream()
@@ -62,16 +64,6 @@ public class AuditLogServiceImpl implements AuditLogService {
                     .toList();
         }
 
-        // agent vede tot
-        if (user.getRole() == Role.AGENT) {
-            return auditLogRepository
-                    .findByEntityIdAndEntityType(entityId, entityType)
-                    .stream()
-                    .map(AuditLogMapper::toDTO)
-                    .toList();
-        }
-
-        // user normal — fara log-uri interne
         return auditLogRepository
                 .findByEntityIdAndEntityTypeAndInternalFalse(entityId, entityType)
                 .stream()
@@ -81,12 +73,19 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public List<AuditLogResponseDTO> getLogsByUser(Long userId) {
-        User user = getAuthenticatedUser();
+        User authenticatedUser = getAuthenticatedUser();
 
-        // admin vede orice user
-        // userul vede doar ale lui
-        if (user.getRole() != Role.ADMIN && !user.getId().equals(userId)) {
+        if (authenticatedUser.getRole() != Role.ADMIN &&
+                authenticatedUser.getRole() != Role.AGENT) {
             throw new UnauthorizedActionException("You cannot view these logs");
+        }
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("userId", userId.toString()));
+
+        if (authenticatedUser.getRole() == Role.AGENT &&
+                targetUser.getRole() == Role.ADMIN){
+            throw new UnauthorizedActionException("Agents cannot view admin logs");
         }
 
         return auditLogRepository
@@ -100,8 +99,8 @@ public class AuditLogServiceImpl implements AuditLogService {
     public List<AuditLogResponseDTO> getLogsByType(AuditType type) {
         User user = getAuthenticatedUser();
 
-        if (user.getRole() != Role.ADMIN) {
-            throw new UnauthorizedActionException("Only admins can filter by type");
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.AGENT) {
+            throw new UnauthorizedActionException("You're not allowed to see the logs");
         }
 
         return auditLogRepository
