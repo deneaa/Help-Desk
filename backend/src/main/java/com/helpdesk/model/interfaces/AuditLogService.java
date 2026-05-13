@@ -1,19 +1,16 @@
 package com.helpdesk.model.interfaces;
 
 import com.helpdesk.model.dto.auditLog.AuditLogResponseDTO;
-import com.helpdesk.model.dto.auditLog.CreateAuditLogRequestDTO;
-import com.helpdesk.model.entities.AuditLog;
+import com.helpdesk.model.enums.AuditType;
 import java.util.List;
 
 public interface AuditLogService {
 
-    AuditLogResponseDTO createLog(CreateAuditLogRequestDTO request);
+    List<AuditLogResponseDTO> getAllLogs();
 
     List<AuditLogResponseDTO> getLogsByEntity(Long entityId, String entityType);
 
-    List<AuditLogResponseDTO> getVisibleLogsByEntity(Long entityId, String entityType);
+    List<AuditLogResponseDTO> getLogsByUser(Long userId);
 
-    List<AuditLogResponseDTO> getAllLogs();
-
-    List<AuditLogResponseDTO> getLatestByEntity(Long entityId, String type, int limit);
+    List<AuditLogResponseDTO> getLogsByType(AuditType type);
 }

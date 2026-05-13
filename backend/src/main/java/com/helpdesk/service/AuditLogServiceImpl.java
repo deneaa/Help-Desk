@@ -1,53 +1,48 @@
 package com.helpdesk.service;
 
+import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.mapper.AuditLogMapper;
 import com.helpdesk.model.dto.auditLog.AuditLogResponseDTO;
-import com.helpdesk.model.dto.auditLog.CreateAuditLogRequestDTO;
-import com.helpdesk.model.entities.AuditLog;
-import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.AuditType;
+import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.AuditLogService;
+import com.helpdesk.model.entities.User;
 import com.helpdesk.repository.AuditLogRepository;
 import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuditLogServiceImpl implements AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
 
-
-    @Override
-    public AuditLogResponseDTO createLog(CreateAuditLogRequestDTO request) {
-
-        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        User user = userPrincipal.getUser();
-        AuditLog auditLog = AuditLog.builder()
-                .action(request.getAction())
-                .entityType(request.getEntityType())
-                .entityId(request.getEntityId())
-                .fieldName(request.getFieldName())
-                .oldValue(request.getOldValue())
-                .newValue(request.getNewValue())
-                .isVisibleToUser(request.isVisibleToUser())
-                .changedBy(user)
-                .build();
+        if (!(principal instanceof UserPrincipal userPrincipal)) {
+            throw new UnauthorizedActionException("Unauthorized");
+        }
 
-        AuditLog saved = auditLogRepository.save(auditLog);
-
-        return AuditLogMapper.toDTO(saved);
+        return userPrincipal.getUser();
     }
 
     @Override
     public List<AuditLogResponseDTO> getAllLogs() {
+        User user = getAuthenticatedUser();
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can access all logs");
+        }
+
         return auditLogRepository.findAll()
                 .stream()
                 .map(AuditLogMapper::toDTO)
@@ -55,31 +50,64 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public List<AuditLogResponseDTO> getLogsByEntity(Long entityId, String entityType){
+    public List<AuditLogResponseDTO> getLogsByEntity(Long entityId, String entityType) {
+        User user = getAuthenticatedUser();
+
+        // admin vede tot
+        if (user.getRole() == Role.ADMIN) {
+            return auditLogRepository
+                    .findByEntityIdAndEntityType(entityId, entityType)
+                    .stream()
+                    .map(AuditLogMapper::toDTO)
+                    .toList();
+        }
+
+        // agent vede tot
+        if (user.getRole() == Role.AGENT) {
+            return auditLogRepository
+                    .findByEntityIdAndEntityType(entityId, entityType)
+                    .stream()
+                    .map(AuditLogMapper::toDTO)
+                    .toList();
+        }
+
+        // user normal — fara log-uri interne
         return auditLogRepository
-                .findByEntityIdAndEntityType(entityId, entityType)
+                .findByEntityIdAndEntityTypeAndInternalFalse(entityId, entityType)
                 .stream()
                 .map(AuditLogMapper::toDTO)
                 .toList();
-
     }
 
     @Override
-    public List<AuditLogResponseDTO> getVisibleLogsByEntity(Long entityId, String entityType){
+    public List<AuditLogResponseDTO> getLogsByUser(Long userId) {
+        User user = getAuthenticatedUser();
+
+        // admin vede orice user
+        // userul vede doar ale lui
+        if (user.getRole() != Role.ADMIN && !user.getId().equals(userId)) {
+            throw new UnauthorizedActionException("You cannot view these logs");
+        }
+
         return auditLogRepository
-                .findByEntityIdAndEntityTypeAndVisibleToUser(entityId, entityType, true)
+                .findByChangedBy_Id(userId)
                 .stream()
                 .map(AuditLogMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public List<AuditLogResponseDTO> getLatestByEntity(Long entityId, String entityType, int limit){
+    public List<AuditLogResponseDTO> getLogsByType(AuditType type) {
+        User user = getAuthenticatedUser();
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can filter by type");
+        }
+
         return auditLogRepository
-                .findByEntityIdAndEntityTypeOrderByChangedAtDesc(entityId, entityType, PageRequest.of(0, limit))
+                .findByType(type)
                 .stream()
                 .map(AuditLogMapper::toDTO)
                 .toList();
     }
-
 }

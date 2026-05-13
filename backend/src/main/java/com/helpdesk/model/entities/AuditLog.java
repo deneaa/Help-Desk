@@ -31,11 +31,12 @@ public class AuditLog {
     @Column(name = "entity_id", nullable = false)
     private Long entityId;
 
-    @Column(columnDefinition = "TEXT")
-    private String beforeData;
+    @Column(name = "new_value", columnDefinition = "TEXT")
+    private String newValue;
 
-    @Column(columnDefinition = "TEXT")
-    private String afterData;
+    @Column(name = "is_internal", nullable = false)
+    @Builder.Default
+    private boolean internal = false;
 
     @CreationTimestamp
     @Column(name = "changed_at", nullable = false, updatable = false)

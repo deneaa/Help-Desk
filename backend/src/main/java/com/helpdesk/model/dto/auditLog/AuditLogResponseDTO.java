@@ -5,24 +5,16 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
 public class AuditLogResponseDTO {
-
     private Long id;
     private AuditType type;
     private String action;
-
     private String entityType;
     private Long entityId;
-
-    private String beforeData;
-    private String afterData;
-
-
+    private String changedBy;
+    private String newValue;
+    private boolean internal;
     private LocalDateTime changedAt;
-    private String changedByName;
 }

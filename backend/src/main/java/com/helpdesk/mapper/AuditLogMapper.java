@@ -12,14 +12,12 @@ public class AuditLogMapper {
                 .action(log.getAction())
                 .entityType(log.getEntityType())
                 .entityId(log.getEntityId())
-                .beforeData(log.getBeforeData())
-                .afterData(log.getAfterData())
+                .changedBy(log.getChangedBy() != null
+                        ? log.getChangedBy().getEmail()
+                        : "system")
+                .newValue(log.getNewValue())
+                .internal(log.isInternal())
                 .changedAt(log.getChangedAt())
-                .changedByName(
-                        log.getChangedBy() != null
-                                ? log.getChangedBy().getName()
-                                : null
-                )
                 .build();
     }
 }

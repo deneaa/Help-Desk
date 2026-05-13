@@ -1,5 +1,7 @@
 package com.helpdesk.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.helpdesk.audit.Auditable;
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.exceptions.comment.CommentEditTimeExpiredException;
 import com.helpdesk.exceptions.comment.CommentNotFoundException;
@@ -11,12 +13,15 @@ import com.helpdesk.mapper.CommentMapper;
 import com.helpdesk.model.dto.comment.CommentResponseDTO;
 import com.helpdesk.model.dto.comment.CreateCommentRequestDTO;
 import com.helpdesk.model.dto.comment.EditCommentRequestDTO;
+import com.helpdesk.model.entities.AuditLog;
 import com.helpdesk.model.entities.Comment;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.AuditType;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.CommentService;
+import com.helpdesk.repository.AuditLogRepository;
 import com.helpdesk.repository.CommentRepository;
 import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.security.UserPrincipal;
@@ -31,7 +36,17 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+    private final AuditLogRepository auditLogRepository;
     private final TicketRepository ticketRepository;
+    private final ObjectMapper objectMapper;
+
+    private String toJson(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
 
     private User getAuthenticatedUser() {
 
@@ -87,9 +102,18 @@ public class CommentServiceImpl implements CommentService {
         comment.setAuthor(authenticatedUser);
         comment.setTicket(ticket);
 
-        Comment saved = commentRepository.save(comment);
+        CommentResponseDTO saved = CommentMapper.toDTO(commentRepository.save(comment));
+        auditLogRepository.save(AuditLog.builder()
+                .type(AuditType.INSERT)
+                .action("CREATED")
+                .entityType("Comment")
+                .entityId(saved.getId())
+                .newValue(toJson(saved))
+                .internal(dto.isInternal())
+                .changedBy(authenticatedUser)
+                .build());
 
-        return CommentMapper.toDTO(saved);
+        return saved;
     }
 
     @Override
@@ -141,6 +165,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Auditable(action = "DELETED", entityType = "Comment", auditType = AuditType.DELETE)
     public void deleteComment(Long id) {
 
         User authenticatedUser = getAuthenticatedUser();
@@ -165,6 +190,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Auditable(action = "UPDATED", entityType = "Comment", auditType = AuditType.UPDATE)
     public CommentResponseDTO updateComment(Long commentId, EditCommentRequestDTO dto) {
 
         User authenticatedUser = getAuthenticatedUser();

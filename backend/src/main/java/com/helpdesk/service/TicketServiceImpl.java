@@ -1,5 +1,6 @@
 package com.helpdesk.service;
 
+import com.helpdesk.audit.Auditable;
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.exceptions.ticket.TicketAlreadyAssignedException;
 import com.helpdesk.exceptions.ticket.TicketAlreadyClosedException;
@@ -12,6 +13,7 @@ import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.dto.ticket.UpdateTicketDTO;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.AuditType;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.enums.Status;
@@ -20,7 +22,7 @@ import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +39,6 @@ public class TicketServiceImpl implements TicketService {
     private final UserRepository userRepository;
 
     private User getAuthenticatedUser() {
-
         Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -51,215 +52,164 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private Ticket getTicketByIdEntity(Long id) {
-
         return ticketRepository.findById(id)
                 .orElseThrow(() -> new TicketNotFoundException(id));
     }
 
     private User getUserByIdEntity(Long id) {
-
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    @Override
-    public TicketResponseDTO createTicket(CreateTicketDTO dto) {
+    // ── scriere ──────────────────────────────────────────────────────────────
 
+    @Override
+    @Auditable(action = "CREATED", entityType = "Ticket", auditType = AuditType.INSERT)
+    public TicketResponseDTO createTicket(CreateTicketDTO dto) {
         User user = getAuthenticatedUser();
         Ticket ticket = TicketMapper.toEntity(dto);
-
         ticket.setCreatedBy(user);
         ticket.setStatus(Status.OPEN);
-        Ticket saved = ticketRepository.save(ticket);
-
-        return TicketMapper.toDTO(saved);
+        ticket.setTicketType(dto.getTicketType());
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 
     @Override
+    @Auditable(action = "UPDATED", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO updateTicket(Long id, UpdateTicketDTO dto) {
-
         User authenticatedUser = getAuthenticatedUser();
-
         Ticket ticket = getTicketByIdEntity(id);
 
         boolean isOwner = ticket.getCreatedBy().getId().equals(authenticatedUser.getId());
 
-        if (!isOwner){
+        if (!isOwner)
             throw new UnauthorizedActionException("You cannot update this ticket");
-        }
-
-        if (ticket.getStatus() == Status.CLOSED){
+        if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
-        }
 
-        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+        if (dto.getTitle() != null && !dto.getTitle().isBlank())
             ticket.setTitle(dto.getTitle().trim());
-        }
-
-        if (dto.getDescription() != null &&
-                !dto.getDescription().isBlank()) {
-
+        if (dto.getDescription() != null && !dto.getDescription().isBlank())
             ticket.setDescription(dto.getDescription().trim());
-        }
 
-        Ticket saved = ticketRepository.save(ticket);
-
-        return TicketMapper.toDTO(saved);
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 
-
     @Override
+    @Auditable(action = "ASSIGNED", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO assignTicket(Long ticketId, Long agentId) {
-
         User authenticatedUser = getAuthenticatedUser();
-
         Ticket ticket = getTicketByIdEntity(ticketId);
 
         if (authenticatedUser.getRole() != Role.AGENT
-                && authenticatedUser.getRole() != Role.ADMIN){
+                && authenticatedUser.getRole() != Role.ADMIN)
             throw new UnauthorizedActionException("Only Admins and Agents can assign tickets");
-        }
 
         User agent = getUserByIdEntity(agentId);
 
-        if (agent.getRole() != Role.AGENT){
+        if (agent.getRole() != Role.AGENT)
             throw new NotAnAgentException(agentId);
-        }
-
-        if (ticket.getAssignedTo() != null && ticket.getAssignedTo().getId().equals(agentId)){
+        if (ticket.getAssignedTo() != null && ticket.getAssignedTo().getId().equals(agentId))
             throw new TicketAlreadyAssignedException();
-        }
-
-        if (ticket.getStatus() == Status.CLOSED){
+        if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
-        }
 
         ticket.setAssignedTo(agent);
-
         return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 
     @Override
+    @Auditable(action = "STATUS_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changeStatus(Long ticketId, Status status) {
-
         User authenticatedUser = getAuthenticatedUser();
-
         Ticket ticket = getTicketByIdEntity(ticketId);
 
         boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
-
         boolean isAssignedAgent = ticket.getAssignedTo() != null &&
                 ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
 
-        if (!isAssignedAgent && !isAdmin){
+        if (!isAssignedAgent && !isAdmin)
             throw new UnauthorizedActionException("You cannot change the ticket status");
-        }
-
-        if (ticket.getStatus() == Status.CLOSED){
+        if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
-        }
 
         ticket.setStatus(status);
-
         return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 
     @Override
+    @Auditable(action = "TYPE_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changeTicketType(Long ticketId, TicketType type) {
-
         User authenticatedUser = getAuthenticatedUser();
-
         Ticket ticket = getTicketByIdEntity(ticketId);
 
         boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
-
         boolean isAssignedAgent = ticket.getAssignedTo() != null &&
                 ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
 
-        if (!isAssignedAgent && !isAdmin){
+        if (!isAssignedAgent && !isAdmin)
             throw new UnauthorizedActionException("You cannot change the ticket type");
-        }
-
-        if (ticket.getStatus() == Status.CLOSED){
+        if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
-        }
 
         ticket.setTicketType(type);
-
         return TicketMapper.toDTO(ticketRepository.save(ticket));
-
     }
 
     @Override
+    @Auditable(action = "UNASSIGNED", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO unassignTicket(Long ticketId) {
-
         User authenticatedUser = getAuthenticatedUser();
-
-        Ticket ticket = getTicketByIdEntity(ticketId);
-
-        boolean isAdmin =
-                authenticatedUser.getRole() == Role.ADMIN;
-
-        boolean isAssignedAgent =
-                ticket.getAssignedTo() != null &&
-                        ticket.getAssignedTo().getId()
-                                .equals(authenticatedUser.getId());
-
-        if (!isAssignedAgent && !isAdmin) {
-            throw new UnauthorizedActionException(
-                    "You cannot unassign this ticket"
-            );
-        }
-
-        if (ticket.getAssignedTo() == null) {
-            throw new TicketAlreadyUnassignedException();
-        }
-
-        if (ticket.getStatus() == Status.CLOSED) {
-            throw new TicketAlreadyClosedException();
-        }
-
-        ticket.setAssignedTo(null);
-
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
-    }
-
-    @Override
-    public TicketResponseDTO changePriority(Long ticketId, Priority priority) {
-
-        User authenticatedUser = getAuthenticatedUser();
-
         Ticket ticket = getTicketByIdEntity(ticketId);
 
         boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
-
         boolean isAssignedAgent = ticket.getAssignedTo() != null &&
                 ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
 
-        if (!isAssignedAgent && !isAdmin){
-            throw new UnauthorizedActionException("You cannot change the ticket priority");
-        }
-
-        if (ticket.getStatus() == Status.CLOSED){
+        if (!isAssignedAgent && !isAdmin)
+            throw new UnauthorizedActionException("You cannot unassign this ticket");
+        if (ticket.getAssignedTo() == null)
+            throw new TicketAlreadyUnassignedException();
+        if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
-        }
 
-        ticket.setPriority(priority);
-
+        ticket.setAssignedTo(null);
         return TicketMapper.toDTO(ticketRepository.save(ticket));
     }
 
     @Override
+    @Auditable(action = "PRIORITY_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    public TicketResponseDTO changePriority(Long ticketId, Priority priority) {
+        User authenticatedUser = getAuthenticatedUser();
+        Ticket ticket = getTicketByIdEntity(ticketId);
+
+        boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
+        boolean isAssignedAgent = ticket.getAssignedTo() != null &&
+                ticket.getAssignedTo().getId().equals(authenticatedUser.getId());
+
+        if (!isAssignedAgent && !isAdmin)
+            throw new UnauthorizedActionException("You cannot change the ticket priority");
+        if (ticket.getStatus() == Status.CLOSED)
+            throw new TicketAlreadyClosedException();
+
+        ticket.setPriority(priority);
+        return TicketMapper.toDTO(ticketRepository.save(ticket));
+    }
+
+    @Override
+    @Auditable(action = "DELETED", entityType = "Ticket", auditType = AuditType.DELETE)
     public void deleteTicket(Long id) {
         User authenticatedUser = getAuthenticatedUser();
 
-        if (authenticatedUser.getRole() != Role.ADMIN){
+        if (authenticatedUser.getRole() != Role.ADMIN)
             throw new UnauthorizedActionException("Only Admins can delete tickets");
-        }
-        Ticket ticket = getTicketByIdEntity(id);
 
+        Ticket ticket = getTicketByIdEntity(id);
         ticketRepository.delete(ticket);
+        // void — aspectul ia id-ul din primul parametru (Long id)
     }
+
+    // ── citire — fara @Auditable ─────────────────────────────────────────────
 
     @Override
     public TicketResponseDTO getTicketById(Long id) {
@@ -284,11 +234,9 @@ public class TicketServiceImpl implements TicketService {
         boolean isAdmin = authenticatedUser.getRole() == Role.ADMIN;
         boolean isOwner = authenticatedUser.getId().equals(userId);
 
-        if (!isAdmin && !isOwner) {
-            throw new UnauthorizedActionException(
-                    "You cannot view these tickets"
-            );
-        }
+        if (!isAdmin && !isOwner)
+            throw new UnauthorizedActionException("You cannot view these tickets");
+
         return ticketRepository.findByCreatedBy_Id(userId)
                 .stream()
                 .map(TicketMapper::toDTO)
