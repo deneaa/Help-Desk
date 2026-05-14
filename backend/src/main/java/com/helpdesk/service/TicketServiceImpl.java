@@ -2,31 +2,26 @@ package com.helpdesk.service;
 
 import com.helpdesk.audit.Auditable;
 import com.helpdesk.exceptions.auth.UnauthorizedActionException;
-import com.helpdesk.exceptions.ticket.TicketAlreadyAssignedException;
-import com.helpdesk.exceptions.ticket.TicketAlreadyClosedException;
-import com.helpdesk.exceptions.ticket.TicketAlreadyUnassignedException;
-import com.helpdesk.exceptions.ticket.TicketNotFoundException;
+import com.helpdesk.exceptions.ticket.*;
 import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.mapper.TicketMapper;
+import com.helpdesk.model.dto.notification.CreateNotificationDTO;
 import com.helpdesk.model.dto.ticket.CreateTicketDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.dto.ticket.UpdateTicketDTO;
 import com.helpdesk.model.entities.Ticket;
 import com.helpdesk.model.entities.User;
-import com.helpdesk.model.enums.AuditType;
-import com.helpdesk.model.enums.Priority;
-import com.helpdesk.model.enums.Role;
-import com.helpdesk.model.enums.Status;
-import com.helpdesk.model.enums.TicketType;
+import com.helpdesk.model.enums.*;
+import com.helpdesk.model.interfaces.NotificationService;
 import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +32,7 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private User getAuthenticatedUser() {
         Object principal = SecurityContextHolder
@@ -61,7 +57,6 @@ public class TicketServiceImpl implements TicketService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // ── scriere ──────────────────────────────────────────────────────────────
 
     @Override
     @Auditable(action = "CREATED", entityType = "Ticket", auditType = AuditType.INSERT)
@@ -101,8 +96,7 @@ public class TicketServiceImpl implements TicketService {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
 
-        if (authenticatedUser.getRole() != Role.AGENT
-                && authenticatedUser.getRole() != Role.ADMIN)
+        if (authenticatedUser.getRole() != Role.AGENT && authenticatedUser.getRole() != Role.ADMIN)
             throw new UnauthorizedActionException("Only Admins and Agents can assign tickets");
 
         User agent = getUserByIdEntity(agentId);
@@ -115,7 +109,18 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyClosedException();
 
         ticket.setAssignedTo(agent);
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
+        TicketResponseDTO saved = TicketMapper.toDTO(ticketRepository.save(ticket));
+
+        notificationService.createNotification(CreateNotificationDTO.builder()
+                .recipientId(agent.getId())
+                .message("Ti-a fost asignat un ticket nou: \"" + ticket.getTitle() + "\"")
+                .type(NotificationType.TICKET_ASSIGNED)
+                .referenceType(NotificationReferenceType.TICKET)
+                .referenceId(ticket.getId())
+                .redirectUrl("/tickets/" + ticket.getId())
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -134,7 +139,18 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyClosedException();
 
         ticket.setStatus(status);
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
+        TicketResponseDTO saved = TicketMapper.toDTO(ticketRepository.save(ticket));
+
+        notificationService.createNotification(CreateNotificationDTO.builder()
+                .recipientId(ticket.getCreatedBy().getId())
+                .message("Statusul ticketului \"" + ticket.getTitle() + "\" a fost schimbat in " + status.name())
+                .type(NotificationType.TICKET_STATUS_CHANGED)
+                .referenceType(NotificationReferenceType.TICKET)
+                .referenceId(ticket.getId())
+                .redirectUrl("/tickets/" + ticket.getId())
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -173,8 +189,22 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.getStatus() == Status.CLOSED)
             throw new TicketAlreadyClosedException();
 
+        Long oldAgentId = ticket.getAssignedTo().getId();
+        String ticketTitle = ticket.getTitle();
+
         ticket.setAssignedTo(null);
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
+        TicketResponseDTO saved = TicketMapper.toDTO(ticketRepository.save(ticket));
+
+        notificationService.createNotification(CreateNotificationDTO.builder()
+                .recipientId(oldAgentId)
+                .message("Ai fost scos de pe ticketul \"" + ticketTitle + "\"")
+                .type(NotificationType.TICKET_UNASSIGNED)
+                .referenceType(NotificationReferenceType.TICKET)
+                .referenceId(ticketId)
+                .redirectUrl("/tickets/" + ticketId)
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -193,7 +223,18 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyClosedException();
 
         ticket.setPriority(priority);
-        return TicketMapper.toDTO(ticketRepository.save(ticket));
+        TicketResponseDTO saved = TicketMapper.toDTO(ticketRepository.save(ticket));
+
+        notificationService.createNotification(CreateNotificationDTO.builder()
+                .recipientId(ticket.getCreatedBy().getId())
+                .message("Prioritatea ticketului \"" + ticket.getTitle() + "\" a fost schimbata in " + priority.name())
+                .type(NotificationType.TICKET_PRIORITY_CHANGED)
+                .referenceType(NotificationReferenceType.TICKET)
+                .referenceId(ticket.getId())
+                .redirectUrl("/tickets/" + ticket.getId())
+                .build());
+
+        return saved;
     }
 
     @Override
@@ -206,10 +247,9 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket ticket = getTicketByIdEntity(id);
         ticketRepository.delete(ticket);
-        // void — aspectul ia id-ul din primul parametru (Long id)
     }
 
-    // ── citire — fara @Auditable ─────────────────────────────────────────────
+    // ── citire ───────────────────────────────────────────────────────────────
 
     @Override
     public TicketResponseDTO getTicketById(Long id) {

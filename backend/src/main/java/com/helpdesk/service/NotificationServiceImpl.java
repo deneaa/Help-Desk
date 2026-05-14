@@ -51,17 +51,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponseDTO createNotification(CreateNotificationDTO dto) {
-
         User recipient = getUserByIdEntity(dto.getRecipientId());
+        User issuer = getAuthenticatedUser();
 
-        User issuer = null;
-
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof UserPrincipal userPrincipal) {
-                issuer = userPrincipal.getUser();
-            }
-        }
 
         Notification notification = Notification.builder()
                 .message(dto.getMessage())
@@ -75,7 +67,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationMapper.toDTO(notificationRepository.save(notification));
     }
-
     @Override
     public List<NotificationResponseDTO> getMyNotifications(){
         User authenticatedUser = getAuthenticatedUser();
