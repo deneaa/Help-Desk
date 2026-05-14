@@ -2,8 +2,12 @@ package com.helpdesk.model.enums;
 
 public enum NotificationType {
     TICKET_CREATED,
-    STATUS_CHANGED,
+    TICKET_ASSIGNED,
+    TICKET_UNASSIGNED,
+    TICKET_STATUS_CHANGED,
+    TICKET_PRIORITY_CHANGED,
+    TICKET_TYPE_CHANGED,
+    TICKET_CLOSED,
+
     COMMENT_ADDED,
-    ASSIGNED,
-    MENTIONED
 }
