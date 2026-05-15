@@ -2,6 +2,7 @@ package com.helpdesk.repository;
 
 import com.helpdesk.model.entities.AuditLog;
 import com.helpdesk.model.enums.AuditType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +20,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByEntityIdAndEntityTypeAndInternalFalse(Long entityId, String entityType);
 
     List<AuditLog> findByAction(String action);
+
+    List<AuditLog> findAllByOrderByChangedAtDesc(Pageable pageable);
 }

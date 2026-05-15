@@ -13,4 +13,6 @@ public interface AuditLogService {
     List<AuditLogResponseDTO> getLogsByUser(Long userId);
 
     List<AuditLogResponseDTO> getLogsByType(AuditType type);
+
+    List<AuditLogResponseDTO> getLastLogs(int limit);
 }

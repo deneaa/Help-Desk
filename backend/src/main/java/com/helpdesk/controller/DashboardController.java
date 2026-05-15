@@ -1,8 +1,8 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.model.dto.dashboard.DashboardPrivateStatsDTO;
 import com.helpdesk.model.dto.dashboard.DashboardStatsDTO;
-import com.helpdesk.model.enums.Status;
-import com.helpdesk.repository.TicketRepository;
+import com.helpdesk.model.interfaces.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,34 +11,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final TicketRepository ticketRepository;
+    private final DashboardService dashboardService;
 
-    @GetMapping
-    public DashboardStatsDTO stats() {
+    @GetMapping()
+    public DashboardStatsDTO getStats() {
+        return dashboardService.getPublicStats();
+    }
 
-        long total = ticketRepository.count();
-
-        long open = ticketRepository.findAll().stream()
-                .filter(t -> t.getStatus() == Status.OPEN)
-                .count();
-
-        long inProgress = ticketRepository.findAll().stream()
-                .filter(t -> t.getStatus() == Status.IN_PROGRESS)
-                .count();
-
-        long closed = ticketRepository.findAll().stream()
-                .filter(t -> t.getStatus() == Status.CLOSED)
-                .count();
-        long reopened = ticketRepository.findAll().stream()
-                .filter(t -> t.getStatus() == Status.REOPENED)
-                .count();
-
-        return new DashboardStatsDTO(
-                total,
-                open,
-                inProgress,
-                closed,
-                reopened
-        );
+    @GetMapping("/private")
+    public DashboardPrivateStatsDTO getPrivateStats(){
+        return dashboardService.getPrivateStats();
     }
 }

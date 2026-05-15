@@ -12,6 +12,7 @@ import com.helpdesk.repository.AuditLogRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,6 +106,22 @@ public class AuditLogServiceImpl implements AuditLogService {
 
         return auditLogRepository
                 .findByType(type)
+                .stream()
+                .map(AuditLogMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<AuditLogResponseDTO> getLastLogs(int limit) {
+
+        User user = getAuthenticatedUser();
+
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.AGENT) {
+            throw new UnauthorizedActionException("Only admins and agents can access logs");
+        }
+
+        return auditLogRepository
+                .findAllByOrderByChangedAtDesc(PageRequest.of(0, limit))
                 .stream()
                 .map(AuditLogMapper::toDTO)
                 .toList();

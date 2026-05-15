@@ -8,16 +8,31 @@ import com.helpdesk.model.enums.TicketType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+
     List<Ticket> findByCreatedBy_Id(Long userId);
+
     Page<Ticket> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
     List<Ticket> findByAssignedTo_Id(Long userId);
+
     List<Ticket> findByStatus(Status status);
+
     List<Ticket> findByPriority(Priority priority);
+
     List<Ticket> findByCategory(Category category);
+
     List<Ticket> findByTicketType(TicketType ticketType);
+
+    long countByStatus(Status status);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }
