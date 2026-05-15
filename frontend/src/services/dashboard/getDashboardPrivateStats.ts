@@ -1,6 +1,6 @@
-import type { WeeklyTicket } from "../../types/types";
+import type { IAuditLog } from "../../types/types";
 
-export interface IDashboardStats {
+export interface IDashboardPrivateStats {
   totalTickets: number;
   openTickets: number;
   inProgressTickets: number;
@@ -12,12 +12,19 @@ export interface IDashboardStats {
   users: number;
   agents: number;
   admins: number;
+
+  auditLogs: IAuditLog[];
 }
 
-export const getDashboardStats = async (
+export interface WeeklyTicket {
+  week: string;
+  tickets: number;
+}
+
+export const getDashboardPrivateStats = async (
   token: string,
-): Promise<IDashboardStats> => {
-  const res = await fetch("http://localhost:8080/api/dashboard", {
+): Promise<IDashboardPrivateStats> => {
+  const res = await fetch("http://localhost:8080/api/dashboard/private", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

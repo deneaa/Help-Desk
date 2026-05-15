@@ -27,6 +27,11 @@ export const Categories = [
 export const Statuses = ["OPEN", "IN_PROGRESS", "CLOSED", "REOPENED"] as const;
 export const TicketTypes = ["BUG", "INCIDENT", "REQUEST", "TASK"] as const;
 
+export interface WeeklyTicket {
+  week: string;
+  tickets: number;
+}
+
 export interface IUser {
   id: number;
   name: string;
