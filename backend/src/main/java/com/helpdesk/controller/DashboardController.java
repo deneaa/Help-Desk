@@ -29,12 +29,16 @@ public class DashboardController {
         long closed = ticketRepository.findAll().stream()
                 .filter(t -> t.getStatus() == Status.CLOSED)
                 .count();
+        long reopened = ticketRepository.findAll().stream()
+                .filter(t -> t.getStatus() == Status.REOPENED)
+                .count();
 
         return new DashboardStatsDTO(
                 total,
                 open,
                 inProgress,
-                closed
+                closed,
+                reopened
         );
     }
 }

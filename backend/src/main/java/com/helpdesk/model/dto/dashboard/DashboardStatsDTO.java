@@ -10,4 +10,5 @@ public class DashboardStatsDTO {
     private long open;
     private long inProgress;
     private long closed;
+    private long reopened;
 }
