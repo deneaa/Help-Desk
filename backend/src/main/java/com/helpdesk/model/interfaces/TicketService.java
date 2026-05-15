@@ -3,6 +3,7 @@ package com.helpdesk.model.interfaces;
 import com.helpdesk.model.dto.ticket.CreateTicketDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.dto.ticket.UpdateTicketDTO;
+import com.helpdesk.model.enums.Category;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.enums.TicketType;
@@ -30,6 +31,8 @@ public interface TicketService {
     TicketResponseDTO changePriority(Long ticketId, Priority priority);
 
     TicketResponseDTO changeTicketType(Long ticketId, TicketType type);
+
+    TicketResponseDTO changeCategory(Long ticketId, Category category);
 
     void deleteTicket(Long id);
 

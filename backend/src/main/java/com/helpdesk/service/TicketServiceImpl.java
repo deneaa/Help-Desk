@@ -238,6 +238,31 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Auditable(action = "CATEGORY_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    public TicketResponseDTO changeCategory(Long ticketId, Category category){
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser.getRole() != Role.ADMIN &&
+                authenticatedUser.getRole() != Role.AGENT){
+            throw new UnauthorizedActionException("Only Admins and Agents can change the category");
+        }
+        Ticket ticket = getTicketByIdEntity(ticketId);
+        ticket.setCategory(category);
+
+        TicketResponseDTO saved = TicketMapper.toDTO(ticketRepository.save(ticket));
+
+        notificationService.createNotification(CreateNotificationDTO.builder()
+                .message("Categoria ticketului \"" + ticket.getCategory() + "\" a fost schimbata in " + category.name())
+                .type(NotificationType.TICKET_CATEGORY_CHANGED)
+                .recipientId(ticket.getCreatedBy().getId())
+                .referenceType(NotificationReferenceType.TICKET)
+                .referenceId(ticket.getId())
+                .redirectUrl("/tickets/" + ticket.getId())
+                .build());
+
+        return saved;
+    }
+
+    @Override
     @Auditable(action = "DELETED", entityType = "Ticket", auditType = AuditType.DELETE)
     public void deleteTicket(Long id) {
         User authenticatedUser = getAuthenticatedUser();
@@ -248,8 +273,6 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = getTicketByIdEntity(id);
         ticketRepository.delete(ticket);
     }
-
-    // ── citire ───────────────────────────────────────────────────────────────
 
     @Override
     public TicketResponseDTO getTicketById(Long id) {

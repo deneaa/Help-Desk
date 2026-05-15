@@ -79,4 +79,11 @@ public class TicketController {
             @Valid @RequestBody ChangeTicketTypeRequestDTO request){
         return ticketService.changeTicketType(ticketId, request.getType());
     }
+
+    @PatchMapping("{ticketId}/category")
+    public TicketResponseDTO changeCategory(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody ChangeCategoryRequestDTO request){
+        return ticketService.changeCategory(ticketId, request.getCategory());
+    }
 }
