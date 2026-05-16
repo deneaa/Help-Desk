@@ -4,8 +4,10 @@ import { Send } from "lucide-react";
 import {
   Categories,
   Priorities,
+  TicketTypes,
   type Category,
   type Priority,
+  type TicketType,
 } from "../types/types";
 import type { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
@@ -15,6 +17,7 @@ interface IForm {
   description: string;
   priority: Priority;
   category: Category;
+  ticketType: TicketType;
 }
 
 const initialForm: IForm = {
@@ -22,6 +25,7 @@ const initialForm: IForm = {
   description: "",
   priority: "LOW",
   category: "IT",
+  ticketType: "BUG"
 };
 
 const CreateTicketPage = () => {
@@ -121,7 +125,25 @@ const CreateTicketPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <label htmlFor="ticketType" className="block text-gray-700 mb-2">
+                Type
+              </label>
+              <select
+                id="ticketType"
+                name="ticketType"
+                value={formData.ticketType}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all bg-gray-50"
+              >
+                {TicketTypes.map((tt) => (
+                  <option key={tt} value={tt}>
+                    {tt}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label htmlFor="priority" className="block text-gray-700 mb-2">
                 Priority

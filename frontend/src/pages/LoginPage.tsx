@@ -171,9 +171,6 @@ const LoginPage = () => {
             </p>
           </div>
         </div>
-        <div className="mt-6 text-center text-gray-500">
-          <p>Demo credentials: any email and password</p>
-        </div>
       </div>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-violet-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>

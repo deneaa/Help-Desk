@@ -185,10 +185,6 @@ const SignupPage = () => {
             </p>
           </div>
         </div>
-
-        <div className="mt-6 text-center text-gray-500">
-          <p>Fill in the form to create account</p>
-        </div>
       </div>
 
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

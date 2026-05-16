@@ -31,7 +31,7 @@ export function Header() {
               <User className="w-5 h-5 text-white" />
             </div>
 
-            <div className="text-right">
+            <div className="text-left">
               <p className="text-gray-900">{name}</p>
               <p className="text-gray-500 text-sm">{role}</p>
             </div>

@@ -1,5 +1,5 @@
-import AdminDashboard from "../components/Dashboard/AdminDashboard";
-import UserDashboard from "../components/Dashboard/UserDashboard";
+import AdminDashboard from "../components/dashboardViews/AdminDashboard";
+import UserDashboard from "../components/dashboardViews/UserDashboard";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
 
