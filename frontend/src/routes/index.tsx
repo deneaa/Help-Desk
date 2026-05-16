@@ -4,7 +4,6 @@ import { AppLayout } from "../layout/AppLayout";
 import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
 import DashboardPage from "../pages/DashboardPage";
-import TicketsPage from "../pages/TicketsPage";
 import MyTicketsPage from "../pages/MyTicketsPage";
 import CreateTicketPage from "../pages/CreateTicketPage";
 import TicketDetailsPage from "../pages/TicketDetailsPage";
@@ -14,9 +13,9 @@ import ProfilePage from "../pages/ProfilePage";
 import AdminDashboardPage from "../pages/AdminDashboardPage";
 import SignupSuccessPage from "../pages/SignupSuccessPage";
 import { requireAuth, requireGuest, requireRole } from "./loader";
+import TicketsPage from '../pages/TicketsPage';
 
 export const router = createBrowserRouter([
-  // Guest only
   {
     path: "/login",
     loader: requireGuest,
