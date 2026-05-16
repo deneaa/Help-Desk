@@ -25,7 +25,7 @@ const initialForm: IForm = {
   description: "",
   priority: "LOW",
   category: "IT",
-  ticketType: "BUG"
+  ticketType: "BUG",
 };
 
 const CreateTicketPage = () => {
@@ -203,6 +203,15 @@ const CreateTicketPage = () => {
             </button>
           </div>
         </form>
+      </div>
+      <div className="mt-6 bg-violet-50 rounded-2xl p-6 border border-violet-100">
+        <h3 className="text-violet-900 mb-2">Tips for Better Support</h3>
+        <ul className="space-y-2 text-violet-700 text-sm">
+          <li>• Be specific and descriptive in your title</li>
+          <li>• Include relevant details like error messages</li>
+          <li>• Choose the appropriate priority level</li>
+          <li>• Select the correct category for faster routing</li>
+        </ul>
       </div>
     </div>
   );

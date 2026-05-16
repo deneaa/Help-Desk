@@ -1,30 +1,25 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { LayoutDashboard, Plus, Inbox, Settings, LogOut } from "lucide-react";
+import { Inbox, LogOut } from "lucide-react";
 import { logout } from "../redux/slices/authSlice";
-
-type NavItem = {
-  path: string;
-  icon: React.ElementType;
-  label: string;
-};
-
-const links: NavItem[] = [
-  { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { path: "/create-ticket", icon: Plus, label: "Create Ticket" },
-  { path: "/tickets/my", icon: Inbox, label: "My Tickets" },
-  { path: "/admin", icon: Settings, label: "Admin Panel" },
-];
+import { NAV_ITEMS } from "../config/navigation";
+import type { Role } from "../types/types";
 
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const isActive = (path: string) => {
-    if (path === "/dashboard") return location.pathname === "/dashboard";
-    return location.pathname.startsWith(path);
-  };
+  const stored = localStorage.getItem("user") ?? sessionStorage.getItem("user");
+  const user: { role: Role } | null = stored ? JSON.parse(stored) : null;
+  const role = user?.role ?? "USER";
+
+  const visibleLinks = NAV_ITEMS.filter((item) => item.roles.includes(role));
+
+  const isActive = (path: string) =>
+    path === "/dashboard"
+      ? location.pathname === "/dashboard"
+      : location.pathname.startsWith(path);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -39,7 +34,6 @@ export function Sidebar() {
           <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
             <Inbox className="w-5 h-5 text-white" />
           </div>
-
           <div>
             <h2 className="text-gray-900">Ticket System</h2>
             <p className="text-gray-500 text-sm">Help Desk</p>
@@ -48,10 +42,9 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
-        {links.map((item) => {
+        {visibleLinks.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
-
           return (
             <Link
               key={item.path}
