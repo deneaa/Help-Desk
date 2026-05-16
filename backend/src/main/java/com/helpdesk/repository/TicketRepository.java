@@ -35,4 +35,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     long countByStatus(Status status);
 
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Ticket> findByStatusOrderByCreatedAtDesc(Status status, Pageable pageable);
 }

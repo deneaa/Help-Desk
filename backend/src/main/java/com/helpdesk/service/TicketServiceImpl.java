@@ -59,7 +59,7 @@ public class TicketServiceImpl implements TicketService {
 
 
     @Override
-    @Auditable(action = "CREATED", entityType = "Ticket", auditType = AuditType.INSERT)
+    @Auditable(action = "CREATED_TICKET", entityType = "Ticket", auditType = AuditType.INSERT)
     public TicketResponseDTO createTicket(CreateTicketDTO dto) {
         User user = getAuthenticatedUser();
         Ticket ticket = TicketMapper.toEntity(dto);
@@ -70,7 +70,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "UPDATED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "UPDATED_TICKET", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO updateTicket(Long id, UpdateTicketDTO dto) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(id);
@@ -91,7 +91,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "ASSIGNED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "ASSIGNED_TICKET", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO assignTicket(Long ticketId, Long agentId) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
@@ -124,7 +124,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "STATUS_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "CHANGED_STATUS", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changeStatus(Long ticketId, Status status) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
@@ -154,7 +154,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "TYPE_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "CHANGED_TICKET_TYPE", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changeTicketType(Long ticketId, TicketType type) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
@@ -173,7 +173,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "UNASSIGNED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "UNASSIGNED_TICKET", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO unassignTicket(Long ticketId) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
@@ -208,7 +208,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "PRIORITY_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "CHANGE_TICKET_PRIORITY", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changePriority(Long ticketId, Priority priority) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicketByIdEntity(ticketId);
@@ -238,7 +238,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "CATEGORY_CHANGED", entityType = "Ticket", auditType = AuditType.UPDATE)
+    @Auditable(action = "CHANGE_TICKET_CATEGORY", entityType = "Ticket", auditType = AuditType.UPDATE)
     public TicketResponseDTO changeCategory(Long ticketId, Category category){
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser.getRole() != Role.ADMIN &&
@@ -263,7 +263,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Auditable(action = "DELETED", entityType = "Ticket", auditType = AuditType.DELETE)
+    @Auditable(action = "DELETED_TICKET", entityType = "Ticket", auditType = AuditType.DELETE)
     public void deleteTicket(Long id) {
         User authenticatedUser = getAuthenticatedUser();
 
@@ -315,4 +315,5 @@ public class TicketServiceImpl implements TicketService {
                 .map(TicketMapper::toDTO)
                 .toList();
     }
+
 }

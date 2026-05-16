@@ -172,7 +172,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Auditable(action = "DELETED", entityType = "Comment", auditType = AuditType.DELETE)
+    @Auditable(action = "DELETED_COMMENT", entityType = "Comment", auditType = AuditType.DELETE)
     public void deleteComment(Long id) {
         User authenticatedUser = getAuthenticatedUser();
         Comment comment = getComment(id);
@@ -191,7 +191,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Auditable(action = "UPDATED", entityType = "Comment", auditType = AuditType.UPDATE)
+    @Auditable(action = "UPDATED_COMMENT", entityType = "Comment", auditType = AuditType.UPDATE)
     public CommentResponseDTO updateComment(Long commentId, EditCommentRequestDTO dto) {
         User authenticatedUser = getAuthenticatedUser();
         Comment comment = getComment(commentId);
