@@ -1,4 +1,4 @@
-import type { IAuditLog } from "../../types/types";
+import type { IAuditLog } from "../../../types/types";
 
 interface ILogs {
   logs: IAuditLog[];
@@ -25,7 +25,8 @@ function formatDate(raw: string): { primary: string; secondary: string } {
   });
 
   if (isToday) return { primary: `Today, ${time}`, secondary: fullDate };
-  if (isYesterday) return { primary: `Yesterday, ${time}`, secondary: fullDate };
+  if (isYesterday)
+    return { primary: `Yesterday, ${time}`, secondary: fullDate };
   return {
     primary: `${date.toLocaleDateString("ro-RO", { day: "numeric", month: "short" })}, ${time}`,
     secondary: fullDate,
@@ -58,7 +59,9 @@ const AuditLogs = ({ logs }: ILogs) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
       <div className="px-5 py-4 border-b border-gray-100">
-        <h2 className="text-gray-900 font-medium text-[15px]">Recent activity</h2>
+        <h2 className="text-gray-900 font-medium text-[15px]">
+          Recent activity
+        </h2>
         <p className="text-gray-500 text-sm">Latest system activity logs</p>
       </div>
 
@@ -93,8 +96,12 @@ const AuditLogs = ({ logs }: ILogs) => {
               </div>
 
               <div className="text-right flex-shrink-0">
-                <p className="text-[13px] text-gray-700 whitespace-nowrap">{primary}</p>
-                <p className="text-[11px] text-gray-400 whitespace-nowrap mt-0.5">{secondary}</p>
+                <p className="text-[13px] text-gray-700 whitespace-nowrap">
+                  {primary}
+                </p>
+                <p className="text-[11px] text-gray-400 whitespace-nowrap mt-0.5">
+                  {secondary}
+                </p>
               </div>
             </div>
           );

@@ -1,9 +1,9 @@
-import { useAppSelector } from "../../hooks/reduxHooks";
-import { usePublicDashboardStats } from "../../hooks/usePublicDashboardStats";
-import type { RootState } from "../../redux/store";
-import StatsGrid from "../dashboard/StatsGrid";
-import UsersGrid from "../dashboard/UsersGrid";
-import WeeklyChart from "../dashboard/WeeklyChart";
+import { useAppSelector } from "../../../hooks/reduxHooks";
+import { usePublicDashboardStats } from "../../../hooks/usePublicDashboardStats";
+import type { RootState } from "../../../redux/store";
+import StatsGrid from "../components/StatsGrid";
+import UsersGrid from "../components/UsersGrid";
+import WeeklyChart from "../components/WeeklyChart";
 
 const UserDashboard = () => {
   const token = useAppSelector((state: RootState) => state.auth.token);

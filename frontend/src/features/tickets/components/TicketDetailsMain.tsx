@@ -1,7 +1,7 @@
 import { Clock, User } from "lucide-react";
-import { getStatusColor } from "../ui/getStatusColor";
-import { getPriorityColor } from "../ui/getPriorityColor";
-import type { ITicket } from "../../types/types";
+import { getStatusColor } from "../../../components/ui/getStatusColor";
+import { getPriorityColor } from "../../../components/ui/getPriorityColor";
+import type { ITicket } from "../../../types/types";
 
 interface Props {
   ticket: ITicket;

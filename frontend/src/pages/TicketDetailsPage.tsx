@@ -16,14 +16,13 @@ import type { RootState } from "../redux/store";
 import { updateTicketStatus } from "../services/tickets/updateTicketStatus";
 import { assignTicket } from "../services/tickets/assignTicket";
 import { updateTicketPriority } from "../services/tickets/updateTicketPriority";
-
-import { TicketHeader } from "../components/ticketDetails/TicketHeader";
-import { TicketDetailsMain } from "../components/ticketDetails/TicketDetailsMain";
-import { TicketConversation } from "../components/ticketDetails/TicketConversation";
-import { TicketDetailsPanel } from "../components/ticketDetails/TicketDetailsPanel";
-import { TicketActionsPanel } from "../components/ticketDetails/TicketActionsPanel";
-import { TicketPriorityModal } from "../components/ticketDetails/TicketPriorityModal";
-import { TicketStatusPanel } from "../components/ticketDetails/TicketStatusPanel";
+import { TicketHeader } from "../features/tickets/components/TicketHeader";
+import { TicketDetailsMain } from "../features/tickets/components/TicketDetailsMain";
+import { TicketConversation } from "../features/tickets/components/TicketConversation";
+import { TicketStatusPanel } from "../features/tickets/components/TicketStatusPanel";
+import { TicketDetailsPanel } from "../features/tickets/components/TicketDetailsPanel";
+import { TicketActionsPanel } from "../features/tickets/components/TicketActionsPanel";
+import { TicketPriorityModal } from "../features/tickets/components/TicketPriorityModal";
 
 const TicketDetailsPage = () => {
   const { id } = useParams();

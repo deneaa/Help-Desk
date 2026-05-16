@@ -1,6 +1,6 @@
 import { User } from "lucide-react";
-import type { ITicket } from "../../types/types";
-import { getPriorityColor } from "../ui/getPriorityColor";
+import type { ITicket } from "../../../types/types";
+import { getPriorityColor } from "../../../components/ui/getPriorityColor";
 
 interface Props {
   ticket: ITicket;

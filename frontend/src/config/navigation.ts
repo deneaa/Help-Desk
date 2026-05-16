@@ -31,15 +31,15 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["ADMIN", "AGENT"],
   },
   {
-    path: "/tickets/my",
-    icon: Ticket,
-    label: "My Tickets",
-    roles: ["USER"],
-  },
-  {
     path: "/tickets/create",
     icon: Plus,
     label: "Create Ticket",
+    roles: ["USER"],
+  },
+  {
+    path: "/tickets/my",
+    icon: Ticket,
+    label: "My Tickets",
     roles: ["USER"],
   },
   {
