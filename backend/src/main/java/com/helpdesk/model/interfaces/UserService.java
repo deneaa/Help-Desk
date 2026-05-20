@@ -3,6 +3,8 @@ package com.helpdesk.model.interfaces;
 import com.helpdesk.model.dto.auth.LoginRequestDTO;
 import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.user.UpdateUserDTO;
+import com.helpdesk.model.dto.user.UserProfileResponse;
+import com.helpdesk.model.dto.user.UserPublicDTO;
 import com.helpdesk.model.dto.user.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 import java.util.List;
@@ -18,4 +20,6 @@ public interface UserService {
     Optional<UserResponseDTO> getUserByName(String name);
     UserResponseDTO setAgent(Long id);
     UserResponseDTO removeAgent(Long id);
+    UserProfileResponse getProfileView(Long targetId);
+    List<UserPublicDTO> getAllPublicUsers();
 }

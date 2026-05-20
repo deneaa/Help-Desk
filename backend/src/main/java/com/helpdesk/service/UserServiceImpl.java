@@ -9,10 +9,14 @@ import com.helpdesk.mapper.UserMapper;
 import com.helpdesk.model.dto.auth.LoginRequestDTO;
 import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.user.UpdateUserDTO;
+import com.helpdesk.model.dto.user.UserProfileResponse;
+import com.helpdesk.model.dto.user.UserPublicDTO;
 import com.helpdesk.model.dto.user.UserResponseDTO;
 import com.helpdesk.model.entities.User;
 import com.helpdesk.model.enums.Role;
+import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.UserService;
+import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TicketRepository ticketRepository;
 
     private User getUserByIdEntity(Long id) {
 
@@ -78,6 +83,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll()
                 .stream()
                 .map(UserMapper::toUserDTO)
+                .toList();
+    }
+
+    @Override
+    public List<UserPublicDTO> getAllPublicUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toPublicDTO)
                 .toList();
     }
 
@@ -189,6 +202,58 @@ public class UserServiceImpl implements UserService {
         User saved = userRepository.save(user);
 
         return UserMapper.toUserDTO(saved);
+    }
+
+
+    @Override
+    public UserProfileResponse getProfileView(Long targetId) {
+        User caller = getAuthenticatedUser();
+        User target = getUserByIdEntity(targetId);
+
+        boolean isAdmin  = caller.getRole() == Role.ADMIN;
+        boolean isAgent  = caller.getRole() == Role.AGENT;
+        boolean isOwn    = caller.getId().equals(targetId);
+        boolean targetIsAdmin = target.getRole() == Role.ADMIN;
+
+        int created  = (int) ticketRepository.countByCreatedById(targetId);
+        int resolved = (int) ticketRepository.countByAssignedToIdAndStatus(targetId, Status.CLOSED);
+
+        // ADMIN → vede tot despre oricine
+        if (isAdmin) {
+            boolean canEdit = true; // adminul poate edita oricine
+            return UserProfileResponse.builder()
+                    .accessLevel("FULL")
+                    .data(UserMapper.toFullDTO(target, created, resolved, canEdit))
+                    .build();
+        }
+
+        // AGENT → vede tot despre user/agent, simplu despre admin
+        if (isAgent) {
+            if (targetIsAdmin) {
+                return UserProfileResponse.builder()
+                        .accessLevel("PUBLIC")
+                        .data(UserMapper.toPublicDTO(target))
+                        .build();
+            }
+            boolean canEdit = isOwn;
+            return UserProfileResponse.builder()
+                    .accessLevel("FULL")
+                    .data(UserMapper.toFullDTO(target, created, resolved, canEdit))
+                    .build();
+        }
+
+        // USER → vede simplu despre toți, full despre propriul profil
+        if (isOwn) {
+            return UserProfileResponse.builder()
+                    .accessLevel("FULL")
+                    .data(UserMapper.toFullDTO(target, created, resolved, true))
+                    .build();
+        }
+
+        return UserProfileResponse.builder()
+                .accessLevel("PUBLIC")
+                .data(UserMapper.toPublicDTO(target))
+                .build();
     }
 
 }

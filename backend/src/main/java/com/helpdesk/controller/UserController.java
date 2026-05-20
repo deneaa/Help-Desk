@@ -2,11 +2,12 @@ package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
-import com.helpdesk.model.dto.user.UserResponseDTO;
+import com.helpdesk.model.dto.user.*;
 import com.helpdesk.model.interfaces.TicketService;
 import com.helpdesk.model.interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,13 +25,43 @@ public class UserController {
         return userService.createUser(dto);
     }
 
-    @GetMapping
-    public List<UserResponseDTO> getAll() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("{userId}/tickets")
+    @GetMapping("/{userId}/tickets")
     public List<TicketResponseDTO> getTicketsByUser(@PathVariable Long userId){
         return ticketService.getTicketsByUser(userId);
     }
- }
+
+    @GetMapping("/{id}/profile")
+    public UserProfileResponse getProfile(@PathVariable Long id){
+        return userService.getProfileView(id);
+    }
+
+    @GetMapping
+    public List<UserPublicDTO> getAllUsers() {
+        return userService.getAllPublicUsers();
+    }
+
+    @PatchMapping("/{id}")
+    public UserResponseDTO updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserDTO dto) {
+        return userService.updateUser(id, dto);
+    }
+
+    @PatchMapping("/{id}/role/promote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponseDTO promote(@PathVariable Long id) {
+        return userService.setAgent(id);
+    }
+
+    @PatchMapping("/{id}/role/demote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponseDTO demote(@PathVariable Long id) {
+        return userService.removeAgent(id);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(@PathVariable Long id) {
+        userService.deleteUser(id);
+    }
+}

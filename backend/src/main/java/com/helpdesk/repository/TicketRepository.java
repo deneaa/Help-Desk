@@ -37,4 +37,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByStatusOrderByCreatedAtDesc(Status status, Pageable pageable);
 
     Page<Ticket> findByStatus(Status status, Pageable pageable);
+
+    long countByCreatedById(Long userId);
+
+    long countByAssignedToIdAndStatus(Long userId, Status status);
 }
