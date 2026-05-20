@@ -20,25 +20,25 @@ const TicketsPage = () => {
       <TicketTableSection
         title="Open Tickets"
         tickets={stats.openTickets}
-        viewAllLink="/tickets/open"
+        viewAllLink="/tickets/category/open"
       />
 
       <TicketTableSection
         title="In Progress Tickets"
         tickets={stats.inProgressTickets}
-        viewAllLink="/tickets/in-progress"
+        viewAllLink="/tickets/category/in_progress"
       />
 
       <TicketTableSection
         title="Closed Tickets"
         tickets={stats.closedTickets}
-        viewAllLink="/tickets/closed"
+        viewAllLink="/tickets/category/closed"
       />
 
       <TicketTableSection
         title="Reopened Tickets"
         tickets={stats.reopenedTickets}
-        viewAllLink="/tickets/reopened"
+        viewAllLink="/tickets/category/reopened"
       />
     </div>
   );

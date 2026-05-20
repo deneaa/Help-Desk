@@ -8,7 +8,7 @@ import type { ITicket } from "../../types/types";
 interface Props {
   title: string;
   tickets: ITicket[];
-  viewAllLink: string;
+  viewAllLink?: string;
 }
 
 const TicketTableSection = ({ title, tickets, viewAllLink }: Props) => {
@@ -24,12 +24,14 @@ const TicketTableSection = ({ title, tickets, viewAllLink }: Props) => {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate(viewAllLink)}
-          className="text-violet-600 hover:text-violet-700 transition-colors"
-        >
-          View All
-        </button>
+        {viewAllLink && (
+          <button
+            onClick={() => navigate(viewAllLink)}
+            className="text-violet-600 hover:text-violet-700 transition-colors"
+          >
+            View All
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -84,13 +86,20 @@ const TicketTableSection = ({ title, tickets, viewAllLink }: Props) => {
                   </span>
                 </td>
 
-                <td className="px-6 py-4 text-gray-600">{ticket.createdAt}</td>
-
+                <td className="px-6 py-4 text-gray-600">
+                  {new Date(ticket.createdAt).toLocaleString("en-EN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
                 <td className="px-6 py-4">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/ticket/${ticket.id}`);
+                      navigate(`/tickets/${ticket.id}`);
                     }}
                     className="p-2 text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
                   >
