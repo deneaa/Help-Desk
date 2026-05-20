@@ -1,9 +1,11 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.ticket.*;
+import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,5 +87,14 @@ public class TicketController {
             @PathVariable Long ticketId,
             @Valid @RequestBody ChangeCategoryRequestDTO request){
         return ticketService.changeCategory(ticketId, request.getCategory());
+    }
+
+    @GetMapping("/category/{status}")
+    public Page<TicketResponseDTO> getTicketsByStatus(
+            @PathVariable Status status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ticketService.getTicketsByStatus(status, page, size);
     }
 }

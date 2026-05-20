@@ -7,6 +7,7 @@ import com.helpdesk.model.enums.Category;
 import com.helpdesk.model.enums.Priority;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.enums.TicketType;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -37,4 +38,6 @@ public interface TicketService {
     void deleteTicket(Long id);
 
     List<TicketResponseDTO> getLastTickets(int limit);
+
+    Page<TicketResponseDTO> getTicketsByStatus(Status status, int page, int size);
 }

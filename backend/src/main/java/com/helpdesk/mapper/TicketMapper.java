@@ -11,6 +11,7 @@ public class TicketMapper {
                 .id(ticket.getId())
                 .title(ticket.getTitle())
                 .description(ticket.getDescription())
+                .ticketType(ticket.getTicketType())
                 .status(ticket.getStatus())
                 .category(ticket.getCategory())
                 .createdAt(ticket.getCreatedAt())

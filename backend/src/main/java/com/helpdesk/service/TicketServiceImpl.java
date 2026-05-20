@@ -18,7 +18,9 @@ import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.repository.UserRepository;
 import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -314,6 +316,19 @@ public class TicketServiceImpl implements TicketService {
                 .stream()
                 .map(TicketMapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    public Page<TicketResponseDTO> getTicketsByStatus(
+            Status status,
+            int page,
+            int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Ticket> tickets = ticketRepository.findByStatus(status, pageable);
+
+        return tickets.map(TicketMapper::toDTO);
     }
 
 }
