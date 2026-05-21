@@ -1,4 +1,4 @@
-import type { IAuditLog } from "../../types/types";
+import type { IAuditLog, WeeklyTicket } from "../../types/types";
 
 export interface IDashboardPrivateStats {
   totalTickets: number;
@@ -16,10 +16,8 @@ export interface IDashboardPrivateStats {
   auditLogs: IAuditLog[];
 }
 
-export interface WeeklyTicket {
-  week: string;
-  tickets: number;
-}
+
+
 
 export const getDashboardPrivateStats = async (
   token: string,

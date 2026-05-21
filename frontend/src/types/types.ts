@@ -27,6 +27,31 @@ export const Categories = [
 export const Statuses = ["OPEN", "IN_PROGRESS", "CLOSED", "REOPENED"] as const;
 export const TicketTypes = ["BUG", "INCIDENT", "REQUEST", "TASK"] as const;
 
+export type AccessLevel = "PUBLIC" | "FULL";
+
+export type UserProfileResponse = {
+  accessLevel: AccessLevel;
+  data: UserPublicDTO | UserFullDTO;
+};
+
+export interface UserPublicDTO {
+  id: number;
+  name: string;
+  role: string;
+  joinedAt: string;
+}
+
+export interface UserFullDTO {
+  id: number;
+  name: string;
+  role: string;
+  joinedAt: string;
+  email: string;
+  ticketsCreated: number;
+  ticketsResolved: number;
+  canEdit: boolean;
+}
+
 export interface WeeklyTicket {
   week: string;
   tickets: number;

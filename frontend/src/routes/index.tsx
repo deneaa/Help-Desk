@@ -15,6 +15,7 @@ import SignupSuccessPage from "../pages/SignupSuccessPage";
 import { requireAuth, requireGuest, requireRole } from "./loader";
 import TicketsPage from "../pages/TicketsPage";
 import TicketsCategoryPage from "../pages/TicketsCategoryPage";
+import UserProfilePage from "../pages/UserProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -40,7 +41,15 @@ export const router = createBrowserRouter([
       { path: "/dashboard", element: <DashboardPage /> },
       { path: "/staff", element: <StaffPage /> },
       { path: "/notifications", element: <NotificationsPage /> },
-      { path: "/profile", element: <ProfilePage /> },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
+      },
+
+      {
+        path: "/users/:id",
+        element: <UserProfilePage />,
+      },
       { path: "/tickets/:id", element: <TicketDetailsPage /> },
       { path: "/tickets/category/:category", element: <TicketsCategoryPage /> },
 
