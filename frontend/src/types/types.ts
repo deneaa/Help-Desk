@@ -57,6 +57,11 @@ export interface WeeklyTicket {
   tickets: number;
 }
 
+export type StaffResponse = {
+  admins: UserPublicDTO[];
+  agents: UserPublicDTO[];
+};
+
 export interface IUser {
   id: number;
   name: string;

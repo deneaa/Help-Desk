@@ -1,10 +1,9 @@
 export const getRoleColor = (role: string) => {
-  switch (role) {
-    case "ADMIN":
-      return "bg-green-100 text-green-700";
-    case "AGENT":
-      return "bg-violet-100 text-violet-700";
-    default:
-      return "bg-blue-100 text-blue-700";
-  }
+  const map: Record<string, string> = {
+    ADMIN: "bg-red-50 text-red-700 border border-red-200",
+    AGENT: "bg-violet-50 text-violet-700 border border-violet-200",
+    USER: "bg-blue-50 text-blue-700 border border-blue-200",
+  };
+
+  return map[role] ?? "bg-gray-50 text-gray-700 border border-gray-200";
 };
