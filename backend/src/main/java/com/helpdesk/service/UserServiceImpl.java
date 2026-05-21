@@ -6,6 +6,7 @@ import com.helpdesk.exceptions.user.NotAnAgentException;
 import com.helpdesk.exceptions.user.UserAlreadyAgentException;
 import com.helpdesk.exceptions.user.UserAlreadyExistsException;
 import com.helpdesk.mapper.UserMapper;
+import com.helpdesk.model.dto.analytics.StaffDTO;
 import com.helpdesk.model.dto.auth.LoginRequestDTO;
 import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.user.UpdateUserDTO;
@@ -253,6 +254,14 @@ public class UserServiceImpl implements UserService {
         return UserProfileResponse.builder()
                 .accessLevel("PUBLIC")
                 .data(UserMapper.toPublicDTO(target))
+                .build();
+    }
+
+    @Override
+    public StaffDTO getStaff(){
+        return StaffDTO.builder()
+                .admins(userRepository.findByRole(Role.ADMIN).stream().map(UserMapper::toPublicDTO).toList())
+                .agents(userRepository.findByRole(Role.AGENT).stream().map(UserMapper::toPublicDTO).toList())
                 .build();
     }
 

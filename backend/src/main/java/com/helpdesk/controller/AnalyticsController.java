@@ -1,10 +1,12 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.analytics.RecentTicketsDTO;
+import com.helpdesk.model.dto.analytics.StaffDTO;
 import com.helpdesk.model.dto.analytics.WeeklyTicketsDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.AnalyticsService;
+import com.helpdesk.model.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.util.List;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
+    private final UserService userService;
 
     @GetMapping("/tickets/weekly")
     public List<WeeklyTicketsDTO> getWeeklyTickets(
@@ -32,8 +35,13 @@ public class AnalyticsController {
         return analyticsService.getLastXTicketsByStatus(limit, status);
     }
 
-    @GetMapping("tickets/recent/grouped")
+    @GetMapping("/tickets/recent/grouped")
     public RecentTicketsDTO getRecentTickets(){
         return analyticsService.getRecentTicketsGroupedByStatus();
+    }
+
+    @GetMapping("/staff")
+    public StaffDTO getStaff(){
+        return userService.getStaff();
     }
 }

@@ -1,5 +1,6 @@
 package com.helpdesk.model.interfaces;
 
+import com.helpdesk.model.dto.analytics.StaffDTO;
 import com.helpdesk.model.dto.auth.LoginRequestDTO;
 import com.helpdesk.model.dto.auth.UserRequestDTO;
 import com.helpdesk.model.dto.user.UpdateUserDTO;
@@ -22,4 +23,5 @@ public interface UserService {
     UserResponseDTO removeAgent(Long id);
     UserProfileResponse getProfileView(Long targetId);
     List<UserPublicDTO> getAllPublicUsers();
+    StaffDTO getStaff();
 }

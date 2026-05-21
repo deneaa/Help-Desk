@@ -25,19 +25,19 @@ public class UserController {
         return userService.createUser(dto);
     }
 
-    @GetMapping("/{userId}/tickets")
-    public List<TicketResponseDTO> getTicketsByUser(@PathVariable Long userId){
-        return ticketService.getTicketsByUser(userId);
-    }
-
-    @GetMapping("/{id}/profile")
-    public UserProfileResponse getProfile(@PathVariable Long id){
-        return userService.getProfileView(id);
-    }
-
     @GetMapping
     public List<UserPublicDTO> getAllUsers() {
         return userService.getAllPublicUsers();
+    }
+
+    @GetMapping("/{id}")
+    public UserProfileResponse getUser(@PathVariable Long id) {
+        return userService.getProfileView(id);
+    }
+
+    @GetMapping("/{id}/tickets")
+    public List<TicketResponseDTO> getTicketsByUser(@PathVariable Long id) {
+        return ticketService.getTicketsByUser(id);
     }
 
     @PatchMapping("/{id}")
