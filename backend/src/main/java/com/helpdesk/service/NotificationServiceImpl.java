@@ -4,10 +4,12 @@ import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.exceptions.notification.NotificationNotFoundException;
 import com.helpdesk.exceptions.user.UserNotFoundException;
 import com.helpdesk.mapper.NotificationMapper;
+import com.helpdesk.model.dto.notification.CreateBroadcastNotificationDTO;
 import com.helpdesk.model.dto.notification.CreateNotificationDTO;
 import com.helpdesk.model.dto.notification.NotificationResponseDTO;
 import com.helpdesk.model.entities.Notification;
 import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.NotificationType;
 import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.interfaces.NotificationService;
 import com.helpdesk.repository.NotificationRepository;
@@ -44,7 +46,7 @@ public class NotificationServiceImpl implements NotificationService {
         return userPrincipal.getUser();
     }
 
-    private Notification getNotification(Long id){
+    private Notification getNotification(Long id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException(id));
     }
@@ -67,8 +69,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationMapper.toDTO(notificationRepository.save(notification));
     }
+
     @Override
-    public List<NotificationResponseDTO> getMyNotifications(){
+    public List<NotificationResponseDTO> getMyNotifications() {
         User authenticatedUser = getAuthenticatedUser();
         return notificationRepository
                 .findByRecipient_IdOrderByCreatedAtDesc(authenticatedUser.getId())
@@ -119,14 +122,14 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void deleteNotification(Long id) {
         User user = getAuthenticatedUser();
-        if (user.getRole() != Role.ADMIN){
+        if (user.getRole() != Role.ADMIN) {
             throw new UnauthorizedActionException("Only admins can delete notifications");
         }
         notificationRepository.deleteById(id);
     }
 
     @Override
-    public void markAllAsRead(){
+    public void markAllAsRead() {
         User authenticatedUser = getAuthenticatedUser();
 
         List<Notification> notifications =
@@ -136,4 +139,29 @@ public class NotificationServiceImpl implements NotificationService {
                         .toList();
         notificationRepository.saveAll(notifications);
     }
+
+    @Override
+    public void broadcastToAllUsers(CreateBroadcastNotificationDTO dto) {
+        User issuer = getAuthenticatedUser();
+
+        if (issuer.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can send global announcements");
+        }
+
+        List<User> allUsers = userRepository.findAll();
+
+        List<Notification> notifications = allUsers.stream()
+                .filter(user -> !user.getId().equals(issuer.getId()))
+                .map(recipient -> Notification.builder()
+                        .message(dto.getMessage())
+                        .type(NotificationType.GLOBAL_ANNOUNCEMENT)
+                        .recipient(recipient)
+                        .issuedBy(issuer)
+                        .isRead(false)
+                        .build())
+                .toList();
+
+        notificationRepository.saveAll(notifications);
+    }
+
 }

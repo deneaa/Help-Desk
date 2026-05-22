@@ -11,4 +11,6 @@ public enum NotificationType {
     TICKET_CLOSED,
 
     COMMENT_ADDED,
+
+    GLOBAL_ANNOUNCEMENT
 }

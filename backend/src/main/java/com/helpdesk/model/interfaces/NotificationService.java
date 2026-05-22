@@ -1,5 +1,6 @@
 package com.helpdesk.model.interfaces;
 
+import com.helpdesk.model.dto.notification.CreateBroadcastNotificationDTO;
 import com.helpdesk.model.dto.notification.CreateNotificationDTO;
 import com.helpdesk.model.dto.notification.NotificationResponseDTO;
 import com.helpdesk.model.entities.Notification;
@@ -19,4 +20,6 @@ public interface NotificationService {
     void deleteNotification(Long id);
 
     void markAllAsRead();
+
+    void broadcastToAllUsers(CreateBroadcastNotificationDTO dto);
 }

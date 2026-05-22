@@ -1,9 +1,12 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.model.dto.notification.CreateBroadcastNotificationDTO;
 import com.helpdesk.model.dto.notification.NotificationResponseDTO;
 import com.helpdesk.model.entities.Notification;
 import com.helpdesk.model.interfaces.NotificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,5 +46,11 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     public void deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
+    }
+
+    @PostMapping("/broadcast")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void broadcastNotification(@Valid @RequestBody CreateBroadcastNotificationDTO request){
+        notificationService.broadcastToAllUsers(request);
     }
 }

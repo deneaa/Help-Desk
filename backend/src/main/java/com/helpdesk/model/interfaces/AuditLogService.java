@@ -2,6 +2,10 @@ package com.helpdesk.model.interfaces;
 
 import com.helpdesk.model.dto.auditLog.AuditLogResponseDTO;
 import com.helpdesk.model.enums.AuditType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface AuditLogService {
@@ -15,4 +19,12 @@ public interface AuditLogService {
     List<AuditLogResponseDTO> getLogsByType(AuditType type);
 
     List<AuditLogResponseDTO> getLastLogs(int limit);
+
+    Page<AuditLogResponseDTO> getLogs(
+            String changedBy,
+            String entityType,
+            AuditType type,
+            LocalDate date,
+            Pageable pageable
+    );
 }
