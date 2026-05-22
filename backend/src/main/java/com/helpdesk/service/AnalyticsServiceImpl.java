@@ -1,19 +1,27 @@
 package com.helpdesk.service;
 
+import com.helpdesk.exceptions.auth.UnauthorizedActionException;
 import com.helpdesk.mapper.TicketMapper;
 import com.helpdesk.model.dto.analytics.RecentTicketsDTO;
+import com.helpdesk.model.dto.analytics.StaffStatsDTO;
 import com.helpdesk.model.dto.analytics.WeeklyTicketsDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
+import com.helpdesk.model.entities.User;
+import com.helpdesk.model.enums.Role;
 import com.helpdesk.model.enums.Status;
 import com.helpdesk.model.interfaces.AnalyticsService;
 import com.helpdesk.repository.TicketRepository;
+import com.helpdesk.repository.UserRepository;
+import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +31,20 @@ import java.util.List;
 public class AnalyticsServiceImpl implements AnalyticsService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
+
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserPrincipal userPrincipal)) {
+            throw new UnauthorizedActionException("Unauthorized");
+        }
+
+        return userPrincipal.getUser();
+    }
 
     @Override
     public List<WeeklyTicketsDTO> getLastTicketsWeek(int weeks) {
@@ -99,6 +121,46 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                                 .map(TicketMapper::toDTO)
                                 .toList()
                 )
+                .build();
+    }
+
+    @Override
+    public List<StaffStatsDTO> getStaffStats() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime weekAgo = now.minusWeeks(1);
+        LocalDateTime monthAgo = now.minusMonths(1);
+
+        List<User> staff = userRepository.findByRole(Role.AGENT);
+
+        return staff.stream().map(user -> {
+            long week = ticketRepository.countByAssignedToIdAndStatusAndUpdatedAtAfter(user.getId(), Status.CLOSED, weekAgo);
+            long month = ticketRepository.countByAssignedToIdAndStatusAndUpdatedAtAfter(user.getId(), Status.CLOSED, monthAgo);
+            long all = ticketRepository.countByAssignedToIdAndStatus(user.getId(), Status.CLOSED);
+
+            return StaffStatsDTO.builder()
+                    .userId(user.getId())
+                    .name(user.getName())
+                    .weekTickets(week)
+                    .monthTickets(month)
+                    .allTimeTickets(all)
+                    .build();
+        }).toList();
+    }
+
+    @Override
+    public StaffStatsDTO getMyStaffStats(){
+        User user = getAuthenticatedUser();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime weekAgo = now.minusWeeks(1);
+        LocalDateTime monthAgo = now.minusMonths(1);
+
+        return StaffStatsDTO.builder()
+                .userId(user.getId())
+                .name(user.getName())
+                .weekTickets(ticketRepository.countByAssignedToIdAndStatusAndUpdatedAtAfter(user.getId(), Status.CLOSED, weekAgo))
+                .monthTickets(ticketRepository.countByAssignedToIdAndStatusAndUpdatedAtAfter(user.getId(), Status.CLOSED, monthAgo))
+                .allTimeTickets(ticketRepository.countByAssignedToIdAndStatus(user.getId(), Status.CLOSED))
                 .build();
     }
 }

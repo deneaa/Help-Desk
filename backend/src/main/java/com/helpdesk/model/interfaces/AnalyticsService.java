@@ -1,6 +1,7 @@
 package com.helpdesk.model.interfaces;
 
 import com.helpdesk.model.dto.analytics.RecentTicketsDTO;
+import com.helpdesk.model.dto.analytics.StaffStatsDTO;
 import com.helpdesk.model.dto.analytics.WeeklyTicketsDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.enums.Status;
@@ -14,5 +15,9 @@ public interface AnalyticsService {
     List<TicketResponseDTO> getLastXTicketsByStatus(int limit, Status status);
 
     RecentTicketsDTO getRecentTicketsGroupedByStatus();
+
+    List<StaffStatsDTO> getStaffStats();
+
+    StaffStatsDTO getMyStaffStats();
 
 }

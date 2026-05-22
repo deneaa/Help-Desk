@@ -2,6 +2,7 @@ package com.helpdesk.controller;
 
 import com.helpdesk.model.dto.analytics.RecentTicketsDTO;
 import com.helpdesk.model.dto.analytics.StaffDTO;
+import com.helpdesk.model.dto.analytics.StaffStatsDTO;
 import com.helpdesk.model.dto.analytics.WeeklyTicketsDTO;
 import com.helpdesk.model.dto.ticket.TicketResponseDTO;
 import com.helpdesk.model.enums.Status;
@@ -40,8 +41,18 @@ public class AnalyticsController {
         return analyticsService.getRecentTicketsGroupedByStatus();
     }
 
-    @GetMapping("/staff")
+    @GetMapping("/staff-members")
     public StaffDTO getStaff(){
         return userService.getStaff();
+    }
+
+    @GetMapping("/staff-stats")
+    public List<StaffStatsDTO> getStaffStats() {
+        return analyticsService.getStaffStats();
+    }
+
+    @GetMapping("/staff-stats/my")
+    public StaffStatsDTO getMyStaffStats(){
+        return analyticsService.getMyStaffStats();
     }
 }

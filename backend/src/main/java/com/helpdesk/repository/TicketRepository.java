@@ -41,4 +41,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     long countByCreatedById(Long userId);
 
     long countByAssignedToIdAndStatus(Long userId, Status status);
+
+    long countByAssignedToIdAndStatusAndUpdatedAtAfter(
+            Long userId,
+            Status status,
+            LocalDateTime date
+    );
 }
