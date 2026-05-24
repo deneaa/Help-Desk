@@ -47,4 +47,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             Status status,
             LocalDateTime date
     );
+
+    Page<Ticket> findByCreatedBy_Id(Long userId, Pageable pageable);
 }

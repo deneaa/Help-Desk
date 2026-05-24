@@ -97,4 +97,12 @@ public class TicketController {
     ) {
         return ticketService.getTicketsByStatus(status, page, size);
     }
+
+    @GetMapping("/my")
+    public Page<TicketResponseDTO> getMyTickets(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ticketService.getMyTickets(page, size);
+    }
 }

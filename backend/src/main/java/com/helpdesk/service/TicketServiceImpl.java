@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -329,6 +330,16 @@ public class TicketServiceImpl implements TicketService {
         Page<Ticket> tickets = ticketRepository.findByStatus(status, pageable);
 
         return tickets.map(TicketMapper::toDTO);
+    }
+
+    @Override
+    public Page<TicketResponseDTO> getMyTickets(int page, int size){
+        User authenticatedUser = getAuthenticatedUser();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return ticketRepository.findByCreatedBy_Id(authenticatedUser.getId(), pageable)
+                .map(TicketMapper::toDTO);
+
     }
 
 }

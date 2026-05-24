@@ -25,6 +25,7 @@ import com.helpdesk.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -156,13 +157,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentResponseDTO> getPublicCommentsByTicket(Long ticketId) {
         User authenticatedUser = getAuthenticatedUser();
         Ticket ticket = getTicket(ticketId);
 
-        if (ticket.getAssignedTo() == null ||
-                !ticket.getAssignedTo().getId().equals(authenticatedUser.getId()))
-            throw new UnauthorizedActionException("You're not allowed to get the comments");
+        boolean isOwner = ticket.getCreatedBy().getId().equals(authenticatedUser.getId());
+        boolean isStaff = authenticatedUser.getRole() == Role.ADMIN ||
+                authenticatedUser.getRole() == Role.AGENT;
+
+        if (!isOwner && !isStaff)
+            throw new UnauthorizedActionException("You're not allowed to view comments");
 
         return commentRepository
                 .findByTicket_IdAndIsInternal(ticketId, false)

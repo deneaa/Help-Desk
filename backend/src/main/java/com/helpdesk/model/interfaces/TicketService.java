@@ -40,4 +40,6 @@ public interface TicketService {
     List<TicketResponseDTO> getLastTickets(int limit);
 
     Page<TicketResponseDTO> getTicketsByStatus(Status status, int page, int size);
+
+    Page<TicketResponseDTO> getMyTickets(int page, int size);
 }
