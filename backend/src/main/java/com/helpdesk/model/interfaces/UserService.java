@@ -24,4 +24,5 @@ public interface UserService {
     UserProfileResponse getProfileView(Long targetId);
     List<UserPublicDTO> getAllPublicUsers();
     StaffDTO getStaff();
+    public List<UserPublicDTO> searchUsers(String query);
 }

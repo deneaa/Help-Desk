@@ -137,7 +137,7 @@ public class TicketServiceImpl implements TicketService {
 
         if (!isAssignedAgent && !isAdmin)
             throw new UnauthorizedActionException("You cannot change the ticket status");
-        if (ticket.getStatus() == Status.CLOSED)
+        if (ticket.getStatus() == Status.CLOSED && !status.equals(Status.REOPENED))
             throw new TicketAlreadyClosedException();
 
         ticket.setStatus(status);

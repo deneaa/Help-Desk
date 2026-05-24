@@ -19,39 +19,38 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<List<CommentResponseDTO>> getAll() {
-        return ResponseEntity.ok(commentService.getAllComments());
+    public List<CommentResponseDTO> getAll() {
+        return commentService.getAllComments();
     }
 
     @GetMapping("/ticket/{ticketId}")
-    public ResponseEntity<List<CommentResponseDTO>> getByTicket(@PathVariable Long ticketId) {
-        return ResponseEntity.ok(commentService.getCommentsByTicket(ticketId));
+    public List<CommentResponseDTO> getByTicket(@PathVariable Long ticketId) {
+        return commentService.getCommentsByTicket(ticketId);
     }
 
     @GetMapping("/ticket/{ticketId}/public")
-    public ResponseEntity<List<CommentResponseDTO>> getPublicByTicket(@PathVariable Long ticketId) {
-        return ResponseEntity.ok(commentService.getPublicCommentsByTicket(ticketId));
+    public List<CommentResponseDTO> getPublicByTicket(@PathVariable Long ticketId) {
+        return commentService.getPublicCommentsByTicket(ticketId);
     }
 
     @PostMapping
-    public ResponseEntity<CommentResponseDTO> add(
+    public CommentResponseDTO add(
             @RequestBody CreateCommentRequestDTO dto
     ) {
-        return ResponseEntity.ok(commentService.addComment(dto));
+        return commentService.addComment(dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public void delete(@PathVariable Long id) {
         commentService.deleteComment(id);
-        return ResponseEntity.noContent().build();
+        return;
     }
 
     @PatchMapping("/{commentId}")
-    public ResponseEntity<CommentResponseDTO> update(
+    public CommentResponseDTO update(
             @PathVariable Long commentId,
             @RequestBody @Valid EditCommentRequestDTO dto
     ) {
-        CommentResponseDTO response = commentService.updateComment(commentId, dto);
-        return ResponseEntity.ok(response);
+        return  commentService.updateComment(commentId, dto);
     }
 }

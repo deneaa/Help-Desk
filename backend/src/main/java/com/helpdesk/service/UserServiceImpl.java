@@ -265,4 +265,12 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public List<UserPublicDTO> searchUsers(String query) {
+        return userRepository
+                .findByNameContainingIgnoreCase(query)
+                .stream()
+                .map(UserMapper::toPublicDTO)
+                .toList();
+    }
 }
