@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getTicketDetails } from "../services/tickets/getTicketDetails";
-import { getCommentsByTicket } from "../services/comments/getCommentsByTicket";
+import { getCommentsByTicket } from "../services/comments/getPublicCommentsByTicket";
 import type { ITicket } from "../types/types";
 
 export const useTicketDetails = (id: number, token: string | null) => {

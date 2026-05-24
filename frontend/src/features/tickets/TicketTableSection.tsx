@@ -54,7 +54,7 @@ const TicketTableSection = ({ title, tickets, viewAllLink }: Props) => {
               <tr
                 key={ticket.id}
                 className="hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => navigate(`/ticket/${ticket.id}`)}
+                onClick={() => navigate(`/tickets/${ticket.id}`)}
               >
                 <td className="px-6 py-4 text-gray-500">#{ticket.id}</td>
 

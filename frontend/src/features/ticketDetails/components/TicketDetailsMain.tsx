@@ -1,6 +1,7 @@
 import { Clock, User } from "lucide-react";
 import { getStatusColor } from "../../../components/ui/getStatusColor";
 import { getPriorityColor } from "../../../components/ui/getPriorityColor";
+import { getTypeColor } from "../../../components/ui/getTypeColor";
 import type { ITicket } from "../../../types/types";
 
 interface Props {
@@ -19,8 +20,8 @@ export const TicketDetailsMain = ({ ticket }: Props) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
       <div className="flex items-start justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+        <div className="w-full">
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
             <span className="text-gray-500">Ticket #{ticket.id}</span>
             <span
               className={`px-3 py-1 rounded-lg text-sm ${getStatusColor(ticket.status)}`}
@@ -31,6 +32,11 @@ export const TicketDetailsMain = ({ ticket }: Props) => {
               className={`px-3 py-1 rounded-lg text-sm ${getPriorityColor(ticket.priority)}`}
             >
               {ticket.priority}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-lg text-sm ${getTypeColor(ticket.ticketType)}`}
+            >
+              {ticket.ticketType}
             </span>
           </div>
 
@@ -44,7 +50,6 @@ export const TicketDetailsMain = ({ ticket }: Props) => {
           <Clock className="w-4 h-4" />
           {formattedDate}
         </div>
-
         <div className="flex items-center gap-2 text-gray-600">
           <User className="w-4 h-4" />
           Reported by {ticket.createdByName}

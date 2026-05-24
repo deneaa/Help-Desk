@@ -2,42 +2,42 @@ import {
   type ITicket,
   type Priority,
   type Status,
+  type TicketType,
   type IComment,
 } from "../types/types";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
 import { getTicketDetails } from "../services/ticketDetailsService";
-import { getCommentsByTicket } from "../services/comments/getCommentsByTicket";
-
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
-
 import { updateTicketStatus } from "../services/tickets/updateTicketStatus";
 import { assignTicket } from "../services/tickets/assignTicket";
 import { updateTicketPriority } from "../services/tickets/updateTicketPriority";
+import { updateTicketType } from "../services/tickets/updateTicketType";
 import { TicketHeader } from "../features/ticketDetails/components/TicketHeader";
 import { TicketDetailsMain } from "../features/ticketDetails/components/TicketDetailsMain";
 import { TicketConversation } from "../features/ticketDetails/components/TicketConversation";
 import { TicketDetailsPanel } from "../features/ticketDetails/components/TicketDetailsPanel";
 import { TicketActionsPanel } from "../features/ticketDetails/components/TicketActionsPanel";
 import { TicketPriorityModal } from "../features/ticketDetails/components/TicketPriorityModal";
+import { TicketTypeModal } from "../features/ticketDetails/components/TicketTypeModal";
 import { TicketStatusPanel } from "../features/ticketDetails/components/TicketStatusPanel";
+import { getPublicCommentsByTicket } from "../services/comments/getPublicCommentsByTicket";
+import { getPrivateCommentsByTicket } from "../services/comments/getPrivateCommentsByTicket";
 
 const TicketDetailsPage = () => {
   const { id } = useParams();
-
   const token = useAppSelector((state: RootState) => state.auth.token);
   const agentId = useAppSelector((state: RootState) => state.auth.user?.id);
+  const role = useAppSelector((state: RootState) => state.auth.user?.role);
 
   const [ticket, setTicket] = useState<ITicket | null>(null);
   const [comments, setComments] = useState<IComment[]>([]);
-
   const [selectedStatus, setSelectedStatus] = useState<Status | "">("");
   const [selectedPriority, setSelectedPriority] = useState<Priority | "">("");
-
+  const [selectedType, setSelectedType] = useState<TicketType | "">("");
   const [isPriorityOpen, setIsPriorityOpen] = useState(false);
-
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,15 +45,16 @@ const TicketDetailsPage = () => {
     const loadTicketData = async () => {
       try {
         if (!token || !id) return;
-
         const ticketData = await getTicketDetails(Number(id), token);
-        const commentsData = await getCommentsByTicket(Number(id), token);
-
+        const commentsData =
+          role === "ADMIN" || role === "AGENT"
+            ? await getPrivateCommentsByTicket(Number(id), token)
+            : await getPublicCommentsByTicket(Number(id), token);
         setTicket(ticketData);
         setComments(commentsData);
-
         setSelectedStatus(ticketData.status);
         setSelectedPriority(ticketData.priority);
+        setSelectedType(ticketData.ticketType);
       } catch (err) {
         console.log(err);
         setError("Failed to load ticket");
@@ -61,95 +62,88 @@ const TicketDetailsPage = () => {
         setLoading(false);
       }
     };
-
     loadTicketData();
-  }, [id, token]);
+  }, [id, token, role]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  if (!ticket) {
-    return <p>Ticket not found</p>;
-  }
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+  if (!ticket) return <p>Ticket not found</p>;
 
   const handleStatusUpdate = async () => {
     if (!selectedStatus || !token) return;
-
     if (ticket.status === selectedStatus) {
       setError("Ticket already has this status");
       return;
     }
-
     try {
-      const updatedTicket = await updateTicketStatus(
+      const updated = await updateTicketStatus(
         Number(id),
         selectedStatus,
         token,
       );
-
-      setTicket(updatedTicket);
+      setTicket(updated);
       setError(null);
-    } catch (err) {
-      console.log(err);
+    } catch {
       setError("Failed to update status");
     }
   };
 
   const handleAssign = async () => {
     if (!ticket || !agentId || !token) return;
-
     if (ticket.assignedToId && ticket.assignedToId !== agentId) {
       setError("Ticket is already assigned");
       return;
     }
-
     if (ticket.assignedToId === agentId) {
       setError("Ticket already assigned to you");
       return;
     }
-
     if (ticket.createdById === agentId) {
       setError("You cannot assign your own ticket");
       return;
     }
-
     try {
-      const updatedTicket = await assignTicket(Number(id), agentId, token);
-
-      setTicket(updatedTicket);
+      const updated = await assignTicket(Number(id), agentId, token);
+      setTicket(updated);
       setError(null);
-    } catch (err) {
-      console.log(err);
+    } catch {
       setError("Failed to assign ticket");
     }
   };
 
   const handlePriorityUpdate = async () => {
     if (!selectedPriority || !token) return;
-
     if (ticket.priority === selectedPriority) {
       setError("Ticket already has this priority");
       return;
     }
-
     try {
-      const updatedTicket = await updateTicketPriority(
+      const updated = await updateTicketPriority(
         Number(id),
         selectedPriority,
         token,
       );
-
-      setTicket(updatedTicket);
+      setTicket(updated);
       setIsPriorityOpen(false);
       setError(null);
-    } catch (err) {
-      console.log(err);
+    } catch {
       setError("Failed to update priority");
+    }
+  };
+
+  const handleTypeUpdate = async () => {
+    if (!selectedType || !token) return;
+    if (ticket.ticketType === selectedType) {
+      setError("Ticket already has this type");
+      return;
+    }
+    try {
+      const updated = await updateTicketType(Number(id), selectedType, token);
+      setTicket(updated);
+      setIsTypeOpen(false);
+      setError(null);
+    } catch {
+      setError("Failed to update type");
     }
   };
 
@@ -166,23 +160,34 @@ const TicketDetailsPage = () => {
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
           <TicketDetailsMain ticket={ticket} />
-
-          <TicketConversation comments={comments} />
+          <TicketConversation
+            comments={comments}
+            role={role!}
+            ticketId={Number(id)}
+            token={token!}
+            onCommentAdded={(newComment) =>
+              setComments((prev) => [...prev, newComment])
+            }
+          />
         </div>
 
         <div className="space-y-6">
-          <TicketStatusPanel
-            selectedStatus={selectedStatus}
-            setSelectedStatus={setSelectedStatus}
-            onUpdate={handleStatusUpdate}
-          />
-
+          {(role === "ADMIN" || role === "AGENT") && (
+            <TicketStatusPanel
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+              onUpdate={handleStatusUpdate}
+            />
+          )}
           <TicketDetailsPanel ticket={ticket} />
-
-          <TicketActionsPanel
-            onAssign={handleAssign}
-            onPriorityOpen={() => setIsPriorityOpen(true)}
-          />
+          {(role === "ADMIN" || role === "AGENT") && (
+            <TicketActionsPanel
+              onAssign={handleAssign}
+              onPriorityOpen={() => setIsPriorityOpen(true)}
+              onTypeOpen={() => setIsTypeOpen(true)}
+              role={role}
+            />
+          )}
         </div>
       </div>
 
@@ -192,6 +197,14 @@ const TicketDetailsPage = () => {
         setSelected={setSelectedPriority}
         onClose={() => setIsPriorityOpen(false)}
         onSave={handlePriorityUpdate}
+      />
+
+      <TicketTypeModal
+        open={isTypeOpen}
+        selected={selectedType}
+        setSelected={setSelectedType}
+        onClose={() => setIsTypeOpen(false)}
+        onSave={handleTypeUpdate}
       />
     </div>
   );

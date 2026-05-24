@@ -51,10 +51,7 @@ export const router = createBrowserRouter([
         path: "/users/:id",
         element: <UserProfilePage />,
       },
-      { path: "/tickets/:id", element: <TicketDetailsPage /> },
       { path: "/tickets/category/:category", element: <TicketsCategoryPage /> },
-      { path: "/search", element: <SearchPage /> },
-
       {
         path: "/tickets/my",
         loader: requireRole(["USER"]),
@@ -65,12 +62,14 @@ export const router = createBrowserRouter([
         loader: requireRole(["USER"]),
         element: <CreateTicketPage />,
       },
-
       {
         path: "/tickets",
         loader: requireRole(["ADMIN", "AGENT"]),
         element: <TicketsPage />,
       },
+      { path: "/tickets/:id", element: <TicketDetailsPage /> },
+
+      { path: "/search", element: <SearchPage /> },
       {
         path: "/admin",
         loader: requireRole(["ADMIN", "AGENT"]),

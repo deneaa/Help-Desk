@@ -91,7 +91,7 @@ export interface ITicket {
 export interface IComment {
   id: number;
   content: string;
-  isInternal: boolean;
+  internal: boolean;
   createdAt: string;
   authorId: number;
   authorName: string;
