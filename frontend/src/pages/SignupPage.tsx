@@ -1,3 +1,4 @@
+import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -74,7 +75,9 @@ const SignupPage = () => {
       <div className="w-full max-w-md mt-5">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg"></div>
+            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <UserPlus className="w-8 h-8 text-white" />
+            </div>
             <h1 className="text-gray-900 mb-2">Ticket Management System</h1>
             <p className="text-gray-500">Create your account</p>
           </div>

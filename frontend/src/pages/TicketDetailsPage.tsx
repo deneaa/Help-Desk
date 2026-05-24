@@ -24,6 +24,7 @@ import { TicketTypeModal } from "../features/ticketDetails/components/TicketType
 import { TicketStatusPanel } from "../features/ticketDetails/components/TicketStatusPanel";
 import { getPublicCommentsByTicket } from "../services/comments/getPublicCommentsByTicket";
 import { getPrivateCommentsByTicket } from "../services/comments/getPrivateCommentsByTicket";
+import { unassignTicket } from "../services/tickets/unassignTicket";
 
 const TicketDetailsPage = () => {
   const { id } = useParams();
@@ -132,6 +133,17 @@ const TicketDetailsPage = () => {
     }
   };
 
+  const handleUnassign = async () => {
+    if (!ticket || !agentId || !token) return;
+    try {
+      const updated = await unassignTicket(Number(id), token);
+      setTicket(updated);
+      setError(null);
+    } catch {
+      setError("Failed to unassign ticket");
+    }
+  };
+
   const handleTypeUpdate = async () => {
     if (!selectedType || !token) return;
     if (ticket.ticketType === selectedType) {
@@ -184,9 +196,11 @@ const TicketDetailsPage = () => {
           {(role === "ADMIN" || role === "AGENT") && (
             <TicketActionsPanel
               onAssign={handleAssign}
+              onUnassign={handleUnassign}
               onPriorityOpen={() => setIsPriorityOpen(true)}
               onTypeOpen={() => setIsTypeOpen(true)}
               role={role}
+              isAssignedToMe={ticket.assignedToId === agentId}
             />
           )}
         </div>
