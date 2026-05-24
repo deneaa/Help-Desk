@@ -6,7 +6,14 @@ import {
   PlusCircle,
   ShieldCheck,
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { UserFullDTO, Role } from "../../../types/types";
+import { promoteUser } from "../../../services/users/promoteUser";
+import { demoteUser } from "../../../services/users/demoteUser";
+import { deleteUser } from "../../../services/users/deleteUser";
+import { useAppSelector } from "../../../hooks/reduxHooks";
+import type { RootState } from "../../../redux/store";
 
 type Props = {
   profile: UserFullDTO;
@@ -19,8 +26,14 @@ export const FullProfileView = ({
   currentUser,
   isSelf = false,
 }: Props) => {
+  const token = useAppSelector((state: RootState) => state.auth.token);
+  const navigate = useNavigate();
   const isAdmin = currentUser.role === "ADMIN";
   const canEdit = isSelf || isAdmin || profile.canEdit;
+
+  const [role, setRole] = useState<string>(profile.role);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const initials = profile.name
     .split(" ")
@@ -28,7 +41,6 @@ export const FullProfileView = ({
     .join("")
     .toUpperCase()
     .slice(0, 2);
-
   const formattedDate = new Date(profile.joinedAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -41,8 +53,58 @@ export const FullProfileView = ({
     USER: "bg-gray-50 text-gray-600 border border-gray-200",
   };
 
+  const handlePromote = async () => {
+    if (!token) return;
+    setLoading("promote");
+    setError(null);
+    try {
+      await promoteUser(profile.id, token);
+      setRole("AGENT");
+    } catch {
+      setError("Failed to promote user");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleDemote = async () => {
+    if (!token) return;
+    setLoading("demote");
+    setError(null);
+    try {
+      await demoteUser(profile.id, token);
+      setRole("USER");
+    } catch {
+      setError("Failed to demote user");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!token) return;
+    if (!confirm(`Are you sure you want to delete ${profile.name}'s account?`))
+      return;
+    setLoading("delete");
+    setError(null);
+    try {
+      await deleteUser(profile.id, token);
+      navigate("/admin");
+    } catch {
+      setError("Failed to delete user");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-5">
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600 text-sm">
+          {error}
+        </div>
+      )}
+
       <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-5">
@@ -51,7 +113,6 @@ export const FullProfileView = ({
                 {initials}
               </span>
             </div>
-
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-xl font-semibold text-gray-900">
@@ -63,26 +124,21 @@ export const FullProfileView = ({
                   </span>
                 )}
                 <span
-                  className={`text-xs px-2.5 py-0.5 rounded-full font-medium uppercase tracking-wide ${
-                    roleColor[profile.role] ?? roleColor["USER"]
-                  }`}
+                  className={`text-xs px-2.5 py-0.5 rounded-full font-medium uppercase tracking-wide ${roleColor[role] ?? roleColor["USER"]}`}
                 >
-                  {profile.role}
+                  {role}
                 </span>
               </div>
-
               <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1.5">
                 <Mail className="w-3.5 h-3.5" />
                 {profile.email}
               </p>
-
               <p className="text-sm text-gray-400 flex items-center gap-1.5 mt-1">
                 <Calendar className="w-3.5 h-3.5" />
                 Joined {formattedDate}
               </p>
             </div>
           </div>
-
           {canEdit && (
             <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
               <Pencil className="w-3.5 h-3.5" />
@@ -105,7 +161,6 @@ export const FullProfileView = ({
           </p>
           <p className="text-xs text-gray-400 mt-1">tickets</p>
         </div>
-
         <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-center gap-2 mb-2">
             <TicketCheck className="w-4 h-4 text-violet-400" />
@@ -118,7 +173,6 @@ export const FullProfileView = ({
           </p>
           <p className="text-xs text-gray-400 mt-1">tickets</p>
         </div>
-
         <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-center gap-2 mb-2">
             <ShieldCheck className="w-4 h-4 text-gray-400" />
@@ -126,9 +180,7 @@ export const FullProfileView = ({
               Role level
             </span>
           </div>
-          <p className="text-lg font-semibold text-gray-800 mt-1">
-            {profile.role}
-          </p>
+          <p className="text-lg font-semibold text-gray-800 mt-1">{role}</p>
         </div>
       </div>
 
@@ -138,18 +190,30 @@ export const FullProfileView = ({
             Admin actions
           </h2>
           <div className="flex gap-3 flex-wrap">
-            {profile.role === "USER" && (
-              <button className="px-4 py-2 text-sm rounded-xl bg-violet-600 text-white hover:bg-violet-700 transition-colors">
-                Promote to Agent
+            {role === "USER" && (
+              <button
+                onClick={handlePromote}
+                disabled={loading === "promote"}
+                className="px-4 py-2 text-sm rounded-xl bg-violet-600 text-white hover:bg-violet-700 transition-colors disabled:opacity-50"
+              >
+                {loading === "promote" ? "Promoting..." : "Promote to Agent"}
               </button>
             )}
-            {profile.role === "AGENT" && (
-              <button className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
-                Demote to User
+            {role === "AGENT" && (
+              <button
+                onClick={handleDemote}
+                disabled={loading === "demote"}
+                className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                {loading === "demote" ? "Demoting..." : "Demote to User"}
               </button>
             )}
-            <button className="px-4 py-2 text-sm rounded-xl bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
-              Delete account
+            <button
+              onClick={handleDelete}
+              disabled={loading === "delete"}
+              className="px-4 py-2 text-sm rounded-xl bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
+            >
+              {loading === "delete" ? "Deleting..." : "Delete account"}
             </button>
           </div>
         </div>
