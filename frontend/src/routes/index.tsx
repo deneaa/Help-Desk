@@ -16,6 +16,7 @@ import { requireAuth, requireGuest, requireRole } from "./loader";
 import TicketsPage from "../pages/TicketsPage";
 import TicketsCategoryPage from "../pages/TicketsCategoryPage";
 import UserProfilePage from "../pages/UserProfilePage";
+import SearchPage from "../pages/SearchPage";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       },
       { path: "/tickets/:id", element: <TicketDetailsPage /> },
       { path: "/tickets/category/:category", element: <TicketsCategoryPage /> },
+      { path: "/search", element: <SearchPage /> },
 
       {
         path: "/tickets/my",

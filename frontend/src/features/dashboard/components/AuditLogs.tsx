@@ -1,3 +1,4 @@
+import { getInitials } from "../../../helpers/getInitials";
 import type { IAuditLog } from "../../../types/types";
 
 interface ILogs {
@@ -31,15 +32,6 @@ function formatDate(raw: string): { primary: string; secondary: string } {
     primary: `${date.toLocaleDateString("ro-RO", { day: "numeric", month: "short" })}, ${time}`,
     secondary: fullDate,
   };
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 const AVATAR_COLORS = [
@@ -92,7 +84,9 @@ const AuditLogs = ({ logs }: ILogs) => {
                     {log.type}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500">{log.action}</p>
+                <p className="text-sm text-gray-500">
+                  {log.action} - {log.entityType} #{log.entityId}
+                </p>
               </div>
 
               <div className="text-right flex-shrink-0">

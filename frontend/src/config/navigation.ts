@@ -7,6 +7,7 @@ import {
   User,
   Settings,
   type LucideIcon,
+  Search,
 } from "lucide-react";
 import type { Role } from "../types/types";
 
@@ -41,6 +42,12 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Ticket,
     label: "My Tickets",
     roles: ["USER"],
+  },
+  {
+    path: "/search",
+    icon: Search,
+    label: "Search",
+    roles: ["ADMIN", "AGENT", "USER"],
   },
   {
     path: "/staff",

@@ -4,7 +4,7 @@ import type { RootState } from "../redux/store";
 import type { StaffResponse } from "../types/types";
 
 const getStaff = async (token: string | null): Promise<StaffResponse> => {
-  const res = await fetch("http://localhost:8080/api/analytics/staff", {
+  const res = await fetch("http://localhost:8080/api/analytics/staff-members", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -119,3 +119,11 @@ export interface IAuditLog {
   changedAt: string;
   changedBy: string;
 }
+
+export type StaffStats = {
+  userId: number;
+  name: string;
+  weekTickets: number;
+  monthTickets: number;
+  allTimeTickets: number;
+};
