@@ -46,10 +46,11 @@ const TicketDetailsPage = () => {
       try {
         if (!token || !id) return;
         const ticketData = await getTicketDetails(Number(id), token);
-        const commentsData =
-          role === "ADMIN" || role === "AGENT"
-            ? await getPrivateCommentsByTicket(Number(id), token)
-            : await getPublicCommentsByTicket(Number(id), token);
+        const isStaff = role === "ADMIN" || role === "AGENT";
+        console.log("fetching comments, isStaff:", isStaff, "role:", role);
+        const commentsData = isStaff
+          ? await getPrivateCommentsByTicket(Number(id), token)
+          : await getPublicCommentsByTicket(Number(id), token);
         setTicket(ticketData);
         setComments(commentsData);
         setSelectedStatus(ticketData.status);
