@@ -1,3 +1,4 @@
+import type { IAuditLog } from "./audit.types";
 import type { UserPublicDTO } from "./user.types";
 
 export interface WeeklyTicket {
@@ -17,3 +18,21 @@ export type StaffStats = {
   monthTickets: number;
   allTimeTickets: number;
 };
+
+export interface IDashboardStats {
+  totalTickets: number;
+  openTickets: number;
+  inProgressTickets: number;
+  closedTickets: number;
+  reopenedTickets: number;
+
+  weeklyTickets: WeeklyTicket[];
+
+  users: number;
+  agents: number;
+  admins: number;
+}
+
+export interface IDashboardPrivateStats extends IDashboardStats {
+  auditLogs: IAuditLog[];
+}

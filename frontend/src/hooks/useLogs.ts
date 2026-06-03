@@ -70,15 +70,11 @@ export const useLogs = (
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     token,
     page,
     size,
-    filters.changedBy,
-    filters.entityType,
-    filters.type,
-    filters.date,
+    filters
   ]);
 
   return { stats, loading, error };

@@ -1,31 +1,11 @@
 import { useEffect, useState } from "react";
-import type { ITicket } from "../types";
+import type { TicketsGrouped } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
+import { apiRequest } from "../services/api";
 
-type TicketsGrouped = {
-  openTickets: ITicket[];
-  inProgressTickets: ITicket[];
-  closedTickets: ITicket[];
-  reopenedTickets: ITicket[];
-};
-
-const getTicketsGrouped = async (
-  token: string | null,
-): Promise<TicketsGrouped> => {
-  const res = await fetch(
-    "http://localhost:8080/api/analytics/tickets/recent/grouped",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  }
-  return res.json();
+const getTicketsGrouped = async (token: string): Promise<TicketsGrouped> => {
+  return apiRequest("/analytics/tickets/recent/grouped", { token });
 };
 
 export const useTicketGrouped = () => {

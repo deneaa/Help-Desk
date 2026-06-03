@@ -2,22 +2,13 @@ import { useEffect, useState } from "react";
 import type { UserProfileResponse } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
+import { apiRequest } from "../services/api";
 
-export const fetchUserProfile = async (
+const getUserProfile = async (
   userId: number,
-  token: string | null,
+  token: string,
 ): Promise<UserProfileResponse> => {
-  const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  }
-
-  return res.json();
+  return apiRequest(`/users/${userId}`, { token });
 };
 
 export const useProfile = (userId: number) => {
@@ -34,7 +25,7 @@ export const useProfile = (userId: number) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchUserProfile(userId, token);
+        const data = await getUserProfile(userId, token);
         setStats(data);
       } catch {
         setError("Failed to load profile");

@@ -2,19 +2,10 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
 import type { INotification } from "../types";
+import { apiRequest } from "../services/api";
 
 const getNotifications = async (token: string): Promise<INotification[]> => {
-  const res = await fetch("http://localhost:8080/api/notifications/my", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch notifications");
-  }
-
-  return res.json();
+  return apiRequest<INotification[]>("/notifications/my", { token });
 };
 
 export const useNotifications = () => {

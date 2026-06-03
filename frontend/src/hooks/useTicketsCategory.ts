@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Category, ITicket } from "../types";
+import type { Category, ITicket, TicketPageResponse } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
-
-export type TicketPageResponse = {
-  content: ITicket[];
-  totalPages: number;
-  totalElements: number;
-  number: number;
-  size: number;
-};
+import { apiRequest } from "../services/api";
 
 const getTicketsCategory = async (
   token: string,
@@ -17,20 +10,9 @@ const getTicketsCategory = async (
   page: number,
   size: number,
 ): Promise<TicketPageResponse> => {
-  const res = await fetch(
-    `http://localhost:8080/api/tickets/category/${category}?page=${page}&size=${size}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  }
-
-  return res.json();
+  return apiRequest(`/tickets/category/${category}?page=${page}&size=${size}`, {
+    token,
+  });
 };
 
 export const useTicketsCategory = (

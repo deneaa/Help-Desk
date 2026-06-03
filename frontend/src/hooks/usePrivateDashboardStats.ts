@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { getDashboardPrivateStats, type IDashboardPrivateStats } from "../services/dashboard/getDashboardPrivateStats";
+import { apiRequest } from "../services/api";
+import type { IDashboardPrivateStats } from "../types";
+
+const getDashboardPrivateStats = async (
+  token: string,
+): Promise<IDashboardPrivateStats> => {
+  return apiRequest("/dashboard/private", { token });
+};
 
 export const usePrivateDashboardStats = (token: string | null) => {
   const [stats, setStats] = useState<IDashboardPrivateStats | null>(null);

@@ -2,18 +2,10 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
 import type { StaffResponse } from "../types";
+import { apiRequest } from "../services/api";
 
-const getStaff = async (token: string | null): Promise<StaffResponse> => {
-  const res = await fetch("http://localhost:8080/api/analytics/staff-members", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  }
-  return res.json();
+const getStaff = async (token: string): Promise<StaffResponse> => {
+  return apiRequest("/analytics/staff-members", { token });
 };
 
 export const useStaff = () => {

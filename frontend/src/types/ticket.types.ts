@@ -17,3 +17,18 @@ export interface ITicket {
   assignedToId: number | null;
   assignedToName: string | null;
 }
+
+export interface TicketsGrouped {
+  openTickets: ITicket[];
+  inProgressTickets: ITicket[];
+  closedTickets: ITicket[];
+  reopenedTickets: ITicket[];
+}
+
+export interface TicketPageResponse {
+  content: ITicket[];
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
+}

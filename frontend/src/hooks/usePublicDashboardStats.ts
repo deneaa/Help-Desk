@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { getDashboardStats, type IDashboardStats } from "../services/dashboard/getDashboardStats";
+import { apiRequest } from "../services/api";
+import type { IDashboardStats } from "../types";
 
+const getDashboardStats = async (token: string): Promise<IDashboardStats> => {
+  return apiRequest("/dashboard", { token });
+};
 export const usePublicDashboardStats = (token: string | null) => {
   const [stats, setStats] = useState<IDashboardStats | null>(null);
   const [loading, setLoading] = useState(false);
