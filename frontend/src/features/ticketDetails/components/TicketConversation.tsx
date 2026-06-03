@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { IComment, Role } from "../../../types/types";
+import type { IComment, Role } from "../../../types";
 
 interface Props {
   comments: IComment[];

@@ -5,7 +5,7 @@ import { Shield, Users, ChevronRight, Loader2 } from "lucide-react";
 import { useStaff } from "../hooks/useStaff";
 import { getInitials } from "../helpers/getInitials";
 
-import type { UserPublicDTO } from "../types/types";
+import type { UserPublicDTO } from "../types";
 import { getAvatarGradient } from "../components/ui/getAvatarGradient";
 import { getRoleColor } from "../components/ui/getRoleColor";
 

@@ -9,7 +9,7 @@ import { useProfile } from "../hooks/useProfile";
 import { FullProfileView } from "../features/profilePage/views/FullProfileView";
 import { PublicProfileView } from "../features/profilePage/views/PublicProfileView";
 
-import type { UserFullDTO, UserPublicDTO } from "../types/types";
+import type { UserFullDTO, UserPublicDTO } from "../types";
 
 const UserProfilePage = () => {
   const navigate = useNavigate();

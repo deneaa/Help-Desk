@@ -1,4 +1,4 @@
-import type { Status } from "../../types/types";
+import type { Status } from "../../types";
 
 export const updateTicketStatus = async (
   ticketId: number,

@@ -1,7 +1,7 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import TicketTableSection from "../features/tickets/TicketTableSection";
 import { useTicketsCategory } from "../hooks/useTicketsCategory";
-import type { Category } from "../types/types";
+import type { Category } from "../types";
 
 const TicketsCategoryPage = () => {
   const { category } = useParams();

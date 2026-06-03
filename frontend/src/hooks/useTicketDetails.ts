@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTicketDetails } from "../services/tickets/getTicketDetails";
 import { getCommentsByTicket } from "../services/comments/getPublicCommentsByTicket";
-import type { ITicket } from "../types/types";
+import type { ITicket } from "../types";
 
 export const useTicketDetails = (id: number, token: string | null) => {
   const [ticket, setTicket] = useState<ITicket | null>(null);

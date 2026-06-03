@@ -1,4 +1,4 @@
-import type { IUser } from "../../types/types";
+import type { IUser } from "../../types";
 
 export const updateUser = async (
   id: number,

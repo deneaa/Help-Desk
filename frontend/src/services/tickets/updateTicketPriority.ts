@@ -1,4 +1,4 @@
-import type { Priority } from "../../types/types";
+import type { Priority } from "../../types";
 
 export const updateTicketPriority = async (
   ticketId: number,

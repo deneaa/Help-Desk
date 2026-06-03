@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Search, User, ChevronRight, Shield, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type { UserPublicDTO } from "../../types/types";
+import type { UserPublicDTO } from "../../types";
 import { useAppSelector } from "../../hooks/reduxHooks";
 import type { RootState } from "../../redux/store";
 

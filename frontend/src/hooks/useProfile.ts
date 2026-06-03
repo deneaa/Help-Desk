@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { UserProfileResponse } from "../types/types";
+import type { UserProfileResponse } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
 

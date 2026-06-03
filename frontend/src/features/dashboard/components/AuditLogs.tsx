@@ -1,5 +1,5 @@
 import { getInitials } from "../../../helpers/getInitials";
-import type { IAuditLog } from "../../../types/types";
+import type { IAuditLog } from "../../../types";
 
 interface ILogs {
   logs: IAuditLog[];

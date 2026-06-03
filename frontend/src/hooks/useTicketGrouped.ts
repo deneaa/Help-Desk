@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ITicket } from "../types/types";
+import type { ITicket } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
 

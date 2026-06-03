@@ -4,7 +4,7 @@ import {
   type Status,
   type TicketType,
   type IComment,
-} from "../types/types";
+} from "../types";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getTicketDetails } from "../services/ticketDetailsService";

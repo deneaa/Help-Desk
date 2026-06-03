@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { IAuditLog } from "../types/types";
+import type { IAuditLog } from "../types";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
 

@@ -1,4 +1,4 @@
-import type { ITicket } from "../../types/types";
+import type { ITicket } from "../../types";
 
 interface PageResponse {
   content: ITicket[];

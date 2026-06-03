@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { UserFullDTO, Role } from "../../../types/types";
+import type { UserFullDTO, Role } from "../../../types";
 import { promoteUser } from "../../../services/users/promoteUser";
 import { demoteUser } from "../../../services/users/demoteUser";
 import { deleteUser } from "../../../services/users/deleteUser";

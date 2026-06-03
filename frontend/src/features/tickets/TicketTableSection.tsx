@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getTypeColor } from "../../components/ui/getTypeColor";
 import { getStatusColor } from "../../components/ui/getStatusColor";
 import { getPriorityColor } from "../../components/ui/getPriorityColor";
-import type { ITicket } from "../../types/types";
+import type { ITicket } from "../../types";
 
 interface Props {
   title: string;

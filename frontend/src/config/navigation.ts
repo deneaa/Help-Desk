@@ -9,7 +9,7 @@ import {
   type LucideIcon,
   Search,
 } from "lucide-react";
-import type { Role } from "../types/types";
+import type { Role } from "../types";
 
 export type NavItem = {
   path: string;

@@ -2,7 +2,7 @@ import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
 import { useProfile } from "../hooks/useProfile";
 import { FullProfileView } from "../features/profilePage/views/FullProfileView";
-import type { UserFullDTO } from "../types/types";
+import type { UserFullDTO } from "../types";
 
 const ProfilePage = () => {
   const currentUser = useAppSelector((state: RootState) => state.auth.user);

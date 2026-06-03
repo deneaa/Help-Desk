@@ -1,4 +1,4 @@
-import type { IComment } from "../../types/types";
+import type { IComment } from "../../types";
 
 interface AddCommentPayload {
   ticketId: number;

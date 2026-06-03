@@ -1,4 +1,4 @@
-import { Priorities, type Priority } from "../../../types/types";
+import { Priorities, type Priority } from "../../../types";
 
 interface Props {
   open: boolean;

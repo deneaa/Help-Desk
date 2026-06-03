@@ -8,7 +8,7 @@ import {
   type Category,
   type Priority,
   type TicketType,
-} from "../types/types";
+} from "../types";
 import type { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
 

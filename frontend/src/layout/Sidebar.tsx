@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Inbox, LogOut } from "lucide-react";
 import { logout } from "../redux/slices/authSlice";
 import { NAV_ITEMS } from "../config/navigation";
-import type { Role } from "../types/types";
+import type { Role } from "../types";
 
 export function Sidebar() {
   const location = useLocation();

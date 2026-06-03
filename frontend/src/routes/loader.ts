@@ -1,5 +1,5 @@
 import { redirect } from "react-router-dom";
-import type { Role } from "../types/types";
+import type { Role } from "../types";
 
 type User = {
   id: number;

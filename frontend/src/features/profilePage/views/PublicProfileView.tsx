@@ -1,5 +1,5 @@
 import { Calendar, Shield } from "lucide-react";
-import type { UserPublicDTO } from "../../../types/types";
+import type { UserPublicDTO } from "../../../types";
 
 type Props = {
   profile: UserPublicDTO;

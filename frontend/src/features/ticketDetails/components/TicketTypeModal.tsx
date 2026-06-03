@@ -1,4 +1,4 @@
-import { TicketTypes, type TicketType } from "../../../types/types";
+import { TicketTypes, type TicketType } from "../../../types";
 
 interface Props {
   open: boolean;

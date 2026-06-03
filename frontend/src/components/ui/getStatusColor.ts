@@ -1,4 +1,4 @@
-import type { Status } from "../../types/types";
+import type { Status } from "../../types";
 
 export const getStatusColor = (status: Status) => {
   switch (status) {

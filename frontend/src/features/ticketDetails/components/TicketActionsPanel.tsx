@@ -1,4 +1,4 @@
-import type { Role } from "../../../types/types";
+import type { Role } from "../../../types";
 
 interface Props {
   onAssign: () => void;

@@ -7,7 +7,7 @@ import { markAsRead } from "../services/notifications/markAsRead";
 import { markAllRead } from "../services/notifications/markAllRead";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
-import type { INotification } from "../types/types";
+import type { INotification } from "../types";
 
 type NotificationTab = "ALL" | "UNREAD" | "READ";
 

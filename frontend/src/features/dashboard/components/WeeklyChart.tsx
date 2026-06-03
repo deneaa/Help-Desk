@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Chart, registerables } from "chart.js";
-import type { WeeklyTicket } from "../../../types/types";
+import type { WeeklyTicket } from "../../../types";
 
 Chart.register(...registerables);
 

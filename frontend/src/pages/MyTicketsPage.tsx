@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
-import type { ITicket } from "../types/types";
+import type { ITicket } from "../types";
 import { getMyTickets } from "../services/tickets/getMyTickets";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import TicketTableSection from "../features/tickets/TicketTableSection";

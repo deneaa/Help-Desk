@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAppSelector } from "./reduxHooks";
 import type { RootState } from "../redux/store";
-import type { INotification } from "../types/types";
+import type { INotification } from "../types";
 
 const getNotifications = async (token: string): Promise<INotification[]> => {
   const res = await fetch("http://localhost:8080/api/notifications/my", {

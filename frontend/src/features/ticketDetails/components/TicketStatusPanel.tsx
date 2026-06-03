@@ -1,4 +1,4 @@
-import { Statuses, type Status } from "../../../types/types";
+import { Statuses, type Status } from "../../../types";
 
 interface Props {
   selectedStatus: Status | "";

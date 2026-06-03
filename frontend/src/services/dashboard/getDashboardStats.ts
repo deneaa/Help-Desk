@@ -1,4 +1,4 @@
-import type { WeeklyTicket } from "../../types/types";
+import type { WeeklyTicket } from "../../types";
 
 export interface IDashboardStats {
   totalTickets: number;
