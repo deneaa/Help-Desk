@@ -7,3 +7,9 @@ export interface IComment {
   authorName: string;
   ticketId: number;
 }
+
+export interface AddCommentPayload {
+  ticketId: number;
+  content: string;
+  internal: boolean;
+}

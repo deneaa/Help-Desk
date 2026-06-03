@@ -32,7 +32,7 @@ export const apiRequest = async <T>(
   const res = await fetch(`${BASE_URL}${endpoint}`, fetchOptions);
 
   if (!res.ok) {
-    throw new Error(`Request failed: ${res.status} - ${endpoint}`);
+    throw new Error(`Request failed: ${res.status} - ${BASE_URL}${endpoint}`);
   }
 
   if (res.status === 204) {

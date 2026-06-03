@@ -9,3 +9,7 @@ export interface INotification {
   issuedBy: string;
   createdAt: string;
 }
+
+export interface BroadcastNotification {
+  message: string;
+}
