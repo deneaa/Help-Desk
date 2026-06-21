@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Users, ChevronRight, Loader2 } from "lucide-react";
 
@@ -16,26 +16,34 @@ const StaffPage = () => {
   const { stats, loading, error } = useStaff();
   const [tab, setTab] = useState<Tab>("ADMIN");
 
-  const filtered: UserPublicDTO[] =
-    tab === "ADMIN" ? (stats?.admins ?? []) : (stats?.agents ?? []);
+  const filtered: UserPublicDTO[] = useMemo(() => {
+    if (!stats) return [];
+    return tab === "ADMIN" ? (stats.admins ?? []) : (stats.agents ?? []);
+  }, [stats, tab]);
 
-  const count = {
-    ADMIN: stats?.admins?.length ?? 0,
-    AGENT: stats?.agents?.length ?? 0,
-  };
+  const count = useMemo(
+    () => ({
+      ADMIN: stats?.admins?.length ?? 0,
+      AGENT: stats?.agents?.length ?? 0,
+    }),
+    [stats],
+  );
 
-  const tabConfig = [
-    {
-      key: "ADMIN" as const,
-      label: "Admins",
-      icon: <Shield className="w-4 h-4" />,
-    },
-    {
-      key: "AGENT" as const,
-      label: "Agents",
-      icon: <Users className="w-4 h-4" />,
-    },
-  ];
+  const tabConfig = useMemo(
+    () => [
+      {
+        key: "ADMIN" as const,
+        label: "Admins",
+        icon: <Shield className="w-4 h-4" />,
+      },
+      {
+        key: "AGENT" as const,
+        label: "Agents",
+        icon: <Users className="w-4 h-4" />,
+      },
+    ],
+    [],
+  );
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4">

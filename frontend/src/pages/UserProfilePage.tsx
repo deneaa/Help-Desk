@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAppSelector } from "../hooks/reduxHooks";
@@ -10,14 +11,31 @@ import type { UserFullDTO, UserPublicDTO } from "../types";
 
 const UserProfilePage = () => {
   const navigate = useNavigate();
-
   const { id } = useParams<{ id: string }>();
 
   const currentUser = useAppSelector((state: RootState) => state.auth.user);
 
-  const userId = Number(id);
+  const userId = useMemo(() => Number(id), [id]);
 
   const { stats, loading, error } = useProfile(userId);
+
+  const isSelf = currentUser?.id === userId;
+
+  const profileView = useMemo(() => {
+    if (!stats) return null;
+
+    if (stats.accessLevel === "FULL") {
+      return (
+        <FullProfileView
+          profile={stats.data as UserFullDTO}
+          currentUser={currentUser!}
+          isSelf={isSelf}
+        />
+      );
+    }
+
+    return <PublicProfileView profile={stats.data as UserPublicDTO} />;
+  }, [stats, currentUser, isSelf]);
 
   if (!currentUser || !id) return <p>Loading...</p>;
   if (loading) return <p>Loading...</p>;
@@ -33,15 +51,7 @@ const UserProfilePage = () => {
         <span className="text-sm font-medium">Go back</span>
       </button>
 
-      {stats.accessLevel === "FULL" ? (
-        <FullProfileView
-          profile={stats.data as UserFullDTO}
-          currentUser={currentUser}
-          isSelf={currentUser.id === userId}
-        />
-      ) : (
-        <PublicProfileView profile={stats.data as UserPublicDTO} />
-      )}
+      {profileView}
     </div>
   );
 };

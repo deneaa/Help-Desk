@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCheck, Check, Loader2 } from "lucide-react";
 
@@ -19,21 +19,36 @@ const NotificationsPage = () => {
 
   const [tab, setTab] = useState<NotificationTab>("ALL");
 
-  if (!token) return null;
+  const { counts, filtered } = useMemo(() => {
+    const all = notifications.length;
+    const unread = notifications.filter((n) => !n.read).length;
+    const read = notifications.filter((n) => n.read).length;
 
-  const counts = {
-    all: notifications.length,
-    unread: notifications.filter((n) => !n.read).length,
-    read: notifications.filter((n) => n.read).length,
-  };
+    const filteredList = notifications.filter((n) => {
+      if (tab === "UNREAD") return !n.read;
+      if (tab === "READ") return n.read;
+      return true;
+    });
 
-  const filtered = notifications.filter((n) => {
-    if (tab === "UNREAD") return !n.read;
-    if (tab === "READ") return n.read;
-    return true;
-  });
+    return {
+      counts: { all, unread, read },
+      filtered: filteredList,
+    };
+  }, [notifications, tab]);
+
+  const tabs: {
+    key: NotificationTab;
+    label: string;
+    count: number;
+  }[] = [
+    { key: "ALL", label: "All", count: counts.all },
+    { key: "UNREAD", label: "Unread", count: counts.unread },
+    { key: "READ", label: "Read", count: counts.read },
+  ];
 
   const handleReadOne = async (id: number) => {
+    if (!token) return;
+
     await markAsRead(id, token);
 
     setNotifications((prev) =>
@@ -42,6 +57,8 @@ const NotificationsPage = () => {
   };
 
   const handleClick = async (n: INotification) => {
+    if (!token) return;
+
     if (!n.read) {
       await handleReadOne(n.id);
     }
@@ -52,6 +69,8 @@ const NotificationsPage = () => {
   };
 
   const handleMarkAll = async () => {
+    if (!token) return;
+
     await markAllRead(token);
 
     const res = await fetch("http://localhost:8080/api/notifications/my", {
@@ -59,15 +78,11 @@ const NotificationsPage = () => {
     });
 
     const data = await res.json();
-
     setNotifications(data);
   };
 
-  const tabs: { key: NotificationTab; label: string; count: number }[] = [
-    { key: "ALL", label: "All", count: counts.all },
-    { key: "UNREAD", label: "Unread", count: counts.unread },
-    { key: "READ", label: "Read", count: counts.read },
-  ];
+  // ✅ EARLY RETURN DUPĂ HOOK-URI (corect)
+  if (!token) return null;
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-white flex justify-center px-6 py-10">
