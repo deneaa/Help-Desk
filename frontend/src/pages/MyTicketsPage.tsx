@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
 import type { ITicket } from "../types";
@@ -8,6 +8,7 @@ import { getMyTickets } from "../services/tickets.service";
 
 const MyTicketsPage = () => {
   const token = useAppSelector((state: RootState) => state.auth.token);
+
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -17,7 +18,10 @@ const MyTicketsPage = () => {
   useEffect(() => {
     const load = async () => {
       if (!token) return;
+
       setLoading(true);
+      setError(null);
+
       try {
         const data = await getMyTickets(token, page);
         setTickets(data.content);
@@ -28,8 +32,25 @@ const MyTicketsPage = () => {
         setLoading(false);
       }
     };
+
     load();
   }, [token, page]);
+
+  const goPrev = useCallback(() => {
+    setPage((p) => Math.max(0, p - 1));
+  }, []);
+
+  const goNext = useCallback(() => {
+    setPage((p) => Math.min(totalPages - 1, p + 1));
+  }, [totalPages]);
+
+  const pages = useMemo(() => {
+    return Array.from({ length: totalPages }, (_, i) => i);
+  }, [totalPages]);
+
+  const handlePage = useCallback((i: number) => {
+    setPage(i);
+  }, []);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -45,28 +66,26 @@ const MyTicketsPage = () => {
 
       <TicketTableSection title="My Tickets" tickets={tickets} />
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            onClick={goPrev}
             disabled={page === 0}
-            className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
 
           <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => (
+            {pages.map((i) => (
               <button
                 key={i}
-                onClick={() => setPage(i)}
-                className={`w-9 h-9 rounded-xl text-sm font-medium transition-all
-                  ${
-                    page === i
-                      ? "bg-violet-500 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                onClick={() => handlePage(i)}
+                className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
+                  page === i
+                    ? "bg-violet-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 {i + 1}
               </button>
@@ -74,9 +93,9 @@ const MyTicketsPage = () => {
           </div>
 
           <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            onClick={goNext}
             disabled={page === totalPages - 1}
-            className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
