@@ -1,15 +1,13 @@
 import { useState } from "react";
-import {
-  sendNotification,
-  type CreateBroadcastNotification,
-} from "../../../services/notifications/sendNotification";
 import { useAppSelector } from "../../../hooks/reduxHooks";
 import type { RootState } from "../../../redux/store";
+import type { BroadcastNotification } from "../../../types";
+import { sendNotification } from "../../../services/notifications.service";
 
 const NotificationPanel = () => {
   const token = useAppSelector((state: RootState) => state.auth.token);
 
-  const [form, setForm] = useState<CreateBroadcastNotification>({
+  const [form, setForm] = useState<BroadcastNotification>({
     message: "",
   });
 

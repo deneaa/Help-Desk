@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { IComment, Role } from "../../../types";
+import { addComment } from "../../../services/comments.service";
 
 interface Props {
   comments: IComment[];
@@ -32,8 +33,6 @@ export const TicketConversation = ({
     setSending(true);
     setError(null);
     try {
-      const { addComment } =
-        await import("../../../services/comments/addComment");
       const newComment = await addComment(
         { ticketId, content: content.trim(), internal: isInternal },
         token,

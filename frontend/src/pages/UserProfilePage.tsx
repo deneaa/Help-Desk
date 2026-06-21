@@ -1,11 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
-
 import { useProfile } from "../hooks/useProfile";
-
 import { FullProfileView } from "../features/profilePage/views/FullProfileView";
 import { PublicProfileView } from "../features/profilePage/views/PublicProfileView";
 

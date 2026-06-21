@@ -7,13 +7,8 @@ import {
 } from "../types";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getTicketDetails } from "../services/ticketDetailsService";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
-import { updateTicketStatus } from "../services/tickets/updateTicketStatus";
-import { assignTicket } from "../services/tickets/assignTicket";
-import { updateTicketPriority } from "../services/tickets/updateTicketPriority";
-import { updateTicketType } from "../services/tickets/updateTicketType";
 import { TicketHeader } from "../features/ticketDetails/components/TicketHeader";
 import { TicketDetailsMain } from "../features/ticketDetails/components/TicketDetailsMain";
 import { TicketConversation } from "../features/ticketDetails/components/TicketConversation";
@@ -22,9 +17,18 @@ import { TicketActionsPanel } from "../features/ticketDetails/components/TicketA
 import { TicketPriorityModal } from "../features/ticketDetails/components/TicketPriorityModal";
 import { TicketTypeModal } from "../features/ticketDetails/components/TicketTypeModal";
 import { TicketStatusPanel } from "../features/ticketDetails/components/TicketStatusPanel";
-import { getPublicCommentsByTicket } from "../services/comments/getPublicCommentsByTicket";
-import { getPrivateCommentsByTicket } from "../services/comments/getPrivateCommentsByTicket";
-import { unassignTicket } from "../services/tickets/unassignTicket";
+import {
+  getPrivateCommentsByTicket,
+  getPublicCommentsByTicket,
+} from "../services/comments.service";
+import {
+  assignTicket,
+  getTicketDetails,
+  unassignTicket,
+  updateTicketPriority,
+  updateTicketStatus,
+  updateTicketType,
+} from "../services/tickets.service";
 
 const TicketDetailsPage = () => {
   const { id } = useParams();

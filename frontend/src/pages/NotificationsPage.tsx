@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Bell, CheckCheck, Check, Loader2 } from "lucide-react";
 
 import { useNotifications } from "../hooks/useNotifications";
-import { markAsRead } from "../services/notifications/markAsRead";
-import { markAllRead } from "../services/notifications/markAllRead";
 import { useAppSelector } from "../hooks/reduxHooks";
 import type { RootState } from "../redux/store";
 import type { INotification } from "../types";
+import { markAllRead, markAsRead } from "../services/notifications.service";
 
 type NotificationTab = "ALL" | "UNREAD" | "READ";
 
