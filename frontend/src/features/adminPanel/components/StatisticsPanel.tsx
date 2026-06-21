@@ -1,25 +1,28 @@
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useAppSelector } from "../../../hooks/reduxHooks";
 import type { RootState } from "../../../redux/store";
+import {
+  getMyStaffStats,
+  getStaffStats,
+} from "../../../services/analytics.service";
+import type { StaffStats } from "../../../types";
 
-type SortField = "weekTickets" | "monthTickets" | "allTimeTickets";
+type SortField = keyof Pick<
+  StaffStats,
+  "weekTickets" | "monthTickets" | "allTimeTickets"
+>;
+
 type SortDir = "asc" | "desc";
 
-type StaffStats = {
-  userId: number;
-  name: string;
-  weekTickets: number;
-  monthTickets: number;
-  allTimeTickets: number;
-};
+const rows: { label: string; field: SortField }[] = [
+  { label: "This Week", field: "weekTickets" },
+  { label: "This Month", field: "monthTickets" },
+  { label: "All Time", field: "allTimeTickets" },
+];
 
-const API = "http://localhost:8080";
-
-const StatisticsPanel = () => {
-  const user = useAppSelector((state: RootState) => state.auth.user);
-  const token = useAppSelector((state: RootState) => state.auth.token);
-
+export default function StatisticsPanel() {
+  const { user, token } = useAppSelector((s: RootState) => s.auth);
   const isAdmin = user?.role === "ADMIN";
 
   const [data, setData] = useState<StaffStats[]>([]);
@@ -29,59 +32,55 @@ const StatisticsPanel = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!token) return;
+    if (!token) return;
+
+    let mounted = true;
+
+    const load = async () => {
+      setLoading(true);
 
       try {
-        setLoading(true);
+        const res = isAdmin
+          ? await getStaffStats(token)
+          : await getMyStaffStats(token);
 
-        const url = isAdmin
-          ? `${API}/api/analytics/staff-stats`
-          : `${API}/api/analytics/staff-stats/my`;
+        if (!mounted) return;
 
-        const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          setData([]);
-          return;
-        }
-
-        const json = await res.json();
-
-        setData(Array.isArray(json) ? json : [json]);
-      } catch (e) {
-        console.error(e);
-        setData([]);
+        const normalized = Array.isArray(res) ? res : [res];
+        setData(normalized);
+      } catch (err) {
+        console.error(err);
+        if (mounted) setData([]);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    fetchData();
-  }, [isAdmin, token]);
+    load();
 
-  const handleSort = (field: SortField) => {
-    if (field === sortField) {
-      setSortDir(sortDir === "desc" ? "asc" : "desc");
-    } else {
-      setSortField(field);
-      setSortDir("desc");
-    }
-  };
+    return () => {
+      mounted = false;
+    };
+  }, [token, isAdmin]);
 
   const sorted = useMemo(() => {
-    if (!Array.isArray(data)) return [];
-
     return [...data].sort((a, b) =>
       sortDir === "desc"
         ? b[sortField] - a[sortField]
         : a[sortField] - b[sortField],
     );
   }, [data, sortField, sortDir]);
+
+  const toggleSort = (field: SortField) => {
+    setSortField((prev) => {
+      if (prev === field) {
+        setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+        return prev;
+      }
+      setSortDir("desc");
+      return field;
+    });
+  };
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field)
@@ -94,21 +93,13 @@ const StatisticsPanel = () => {
     );
   };
 
-  const rows = [
-    { label: "Tickets solved this Week", field: "weekTickets" as SortField },
-    { label: "Tickets solved this Month", field: "monthTickets" as SortField },
-    { label: "Tickets solved all Time", field: "allTimeTickets" as SortField },
-  ];
-
-  if (loading) {
-    return <div className="text-gray-500">Loading...</div>;
-  }
+  if (loading) return <div className="text-gray-500">Loading...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-gray-900 font-medium">
-          {isAdmin ? "All Agent Statistics" : "Your Statistics"}
+        <h3 className="font-medium text-gray-900">
+          {isAdmin ? "All Agents" : "My Stats"}
         </h3>
 
         {isAdmin && (
@@ -116,14 +107,15 @@ const StatisticsPanel = () => {
             {rows.map(({ label, field }) => (
               <button
                 key={field}
-                onClick={() => handleSort(field)}
-                className={`px-3 py-1.5 rounded-lg text-sm border ${
+                onClick={() => toggleSort(field)}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition ${
                   sortField === field
                     ? "border-violet-300 bg-violet-50 text-violet-700"
                     : "border-gray-200 text-gray-500"
                 }`}
               >
-                {label} <SortIcon field={field} />
+                {label}
+                <SortIcon field={field} />
               </button>
             ))}
           </div>
@@ -134,10 +126,10 @@ const StatisticsPanel = () => {
         {sorted.map((agent) => (
           <div
             key={agent.userId}
-            className="bg-white rounded-2xl p-6 border border-gray-100"
+            className="bg-white border border-gray-100 rounded-2xl p-6"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-violet-500 rounded-xl flex items-center justify-center text-white font-bold">
+              <div className="w-12 h-12 bg-violet-500 text-white rounded-xl flex items-center justify-center font-bold">
                 {agent.name
                   .split(" ")
                   .map((n) => n[0])
@@ -145,8 +137,8 @@ const StatisticsPanel = () => {
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900">{agent.name}</h4>
-                <span className="text-sm text-gray-400">Agent</span>
+                <h4 className="text-gray-900 font-medium">{agent.name}</h4>
+                <span className="text-gray-400 text-sm">Agent</span>
               </div>
             </div>
 
@@ -156,7 +148,7 @@ const StatisticsPanel = () => {
                   key={field}
                   className="flex justify-between p-3 bg-gray-50 rounded-lg"
                 >
-                  <span className="text-gray-500 text-sm">{label}</span>
+                  <span className="text-sm text-gray-500">{label}</span>
                   <span className="font-semibold">{agent[field]}</span>
                 </div>
               ))}
@@ -166,6 +158,4 @@ const StatisticsPanel = () => {
       </div>
     </div>
   );
-};
-
-export default StatisticsPanel;
+}
